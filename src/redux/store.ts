@@ -1,13 +1,18 @@
 import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
-import { valueApi } from "../api";
 import { userApi } from "../api/user.api";
+import { valueApi } from "../api";
+import { authApi } from "../api/auth.api";
+import authReducer from "../redux/Slices/authSlice";
 
 export const store = configureStore({
   reducer: {
     [userApi.reducerPath]: userApi.reducer,
     [valueApi.reducerPath]: valueApi.reducer,
+    [authApi.reducerPath]: authApi.reducer,
+    auth: authReducer,
   },
-  middleware: (gDM) => gDM().concat(userApi.middleware, valueApi.middleware),
+  middleware: (gDM) =>
+    gDM().concat(userApi.middleware, valueApi.middleware, authApi.middleware),
 });
 
 export type AppDispatch = typeof store.dispatch;

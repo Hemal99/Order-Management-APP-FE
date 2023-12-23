@@ -4,7 +4,7 @@ import { useGetAllValuesQuery, useGetOneValueQuery } from "../api";
 import type { IValue } from "../models/services/value";
 
 function Value() {
-  const { currentData, isError, isLoading, isSuccess, error, isFetching } =
+  const { currentData, isError, isLoading, isSuccess, isFetching } =
     useGetAllValuesQuery({
       pollingInterval: 0, // disable polling for this query
       refetchOnMountOrArgChange: true,
