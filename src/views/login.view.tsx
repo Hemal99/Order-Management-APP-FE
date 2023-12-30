@@ -65,7 +65,7 @@ export default function Login() {
 
   console.log(watch("email"));
 
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+  const onSubmit: SubmitHandler<Inputs> = async (data: any) => {
     const { email, password } = data;
     setLoginErr("");
 
@@ -74,36 +74,29 @@ export default function Login() {
         email: email,
         password: password,
       }).unwrap();
-      console.log(userData);
+      console.log("helooo", userData);
       dispatch(
         setCredentials({
           user: {
-            name: "pushpitha",
-            email: "admin@gmail.com",
-            role: "admin",
+            name: userData.firstName,
+            email: userData.email,
+            role: userData.role,
             id: userData.id,
             isEmailVerified: false,
           },
           accessToken: userData.signature,
         })
       );
+
+      sessionStorage.setItem("user", JSON.stringify(userData));
+
+      sessionStorage.setItem("accessToken", userData.signature);
+
       navigate("/");
     } catch (error) {
       setLoginErr((error as LoginError).data?.msg);
     }
   };
-
-  if (useSelector(selectCurrentUser)) {
-    navigate("/");
-  }
-
-  const loggedInUser = useSelector(selectCurrentUser);
-
-  useEffect(() => {
-    if (loggedInUser) {
-      navigate("/");
-    }
-  }, [loggedInUser]);
 
   return (
     <Grid container component="main" sx={{ height: "100vh" }}>

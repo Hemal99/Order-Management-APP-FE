@@ -25,8 +25,8 @@ type AuthState = {
 // const sampleToken = "sda";
 
 const initialState: AuthState = {
-  user: null,
-  token: null,
+  user: JSON.parse(sessionStorage.getItem("user") || "{}"),
+  token: sessionStorage.getItem("accessToken") || "",
 };
 
 const authSlice = createSlice({

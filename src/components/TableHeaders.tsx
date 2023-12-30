@@ -1,43 +1,46 @@
 import { ColumnDef } from "@tanstack/react-table";
 import MoreOutlinedIcon from "@mui/icons-material/MoreOutlined";
 import { IconButton } from "@mui/material";
+import moment from "moment";
 
 export const Columns: ColumnDef<any, any>[] = [
   {
     accessorKey: "date",
     header: "Date",
     cell: (data: any) => {
-      return <span>{data.row.original.date}</span>;
+      return (
+        <span>{moment(data.row.original.createdAt).format("YYYY MMM DD")}</span>
+      );
     },
   },
 
   {
-    accessorKey: "ItemName",
-    header: "Item Name",
+    accessorKey: "productName",
+    header: "Product Name",
     cell: (data: any) => {
-      return <span>{data.row.original.ItemName}</span>;
+      return <span>{data.row.original.productName}</span>;
     },
   },
 
   {
-    accessorKey: "qty",
+    accessorKey: "quantity",
     header: "Quantity",
     cell: (data: any) => {
-      return <span>{data.row.original.qty}</span>;
+      return <span>{data.row.original.quantity}</span>;
     },
   },
   {
-    accessorKey: "price",
-    header: "Price",
+    accessorKey: "sellingPrice",
+    header: "Selling Price",
     cell: (data: any) => {
-      return <span>{data.row.original.price}</span>;
+      return <span>{data.row.original.sellingPrice}</span>;
     },
   },
   {
-    accessorKey: "CodeNumber",
+    accessorKey: "codeNumber",
     header: "Code",
     cell: (data: any) => {
-      return <span>{data.row.original.CodeNumber}</span>;
+      return <span>{data.row.original.codeNumber}</span>;
     },
   },
   {

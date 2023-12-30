@@ -41,7 +41,8 @@ export default function AppBarDrawer(props: { title: string }) {
 
   const handleLogOut = () => {
     dispatch(logOut());
-    window.location.reload();
+    sessionStorage.removeItem("accessToken");
+    sessionStorage.removeItem("user");
   };
 
   return (

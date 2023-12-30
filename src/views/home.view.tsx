@@ -5,6 +5,7 @@ import Table from "../components/Table";
 import { Columns } from "../components/TableHeaders";
 import { sampleData } from "../components/sampleData";
 import OrderRequestFormDialog from "../components/OrderRequestDialog";
+import axios from "../utils/axios";
 
 type dataRow = {
   date: string;
@@ -37,23 +38,25 @@ const Home = () => {
 
   // useEffect to get the data
 
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      // If you have an API, do your normal axios or fetch
+
+      const { data } = await axios.get("/user/get-all-request");
+      console.log(data);
+      setItems(data);
+
+      setTotalPageCount(10 / ITEMS_PER_PAGE);
+
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // If you have an API, do your normal axios or fetch
-
-        const response = await sampleData;
-        setItems(response);
-
-        setTotalPageCount(10 / ITEMS_PER_PAGE);
-
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      }
-    };
     fetchData();
   }, [currentPage]);
 

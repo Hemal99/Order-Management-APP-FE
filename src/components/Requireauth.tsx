@@ -10,14 +10,21 @@ const RequireAuth = (props: { allowedRoles: string[] }) => {
   const role = useSelector(selectCurrentUserRole);
   const location = useLocation();
 
-  if (role && props.allowedRoles?.includes(role)) {
+  console.log("token", token);
+
+  // if (role && props.allowedRoles?.includes(role)) {
+  //   return <Outlet />;
+  // } else {
+  //   if (token) {
+  //     return <Navigate to="/unauthorized" state={{ from: location }} replace />;
+  //   } else {
+  //     return <Navigate to="/login" state={{ from: location }} replace />;
+  //   }
+  // }
+  if (token) {
     return <Outlet />;
   } else {
-    if (token) {
-      return <Navigate to="/unauthorized" state={{ from: location }} replace />;
-    } else {
-      return <Navigate to="/login" state={{ from: location }} replace />;
-    }
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 };
 
