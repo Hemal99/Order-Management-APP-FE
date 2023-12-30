@@ -18,7 +18,11 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
 import ClearIcon from "@mui/icons-material/Clear";
 import { useSelector } from "react-redux";
-import { selectCurrentToken } from "../redux/Slices/authSlice";
+import {
+  selectCurrentToken,
+  selectCurrentUser,
+} from "../redux/Slices/authSlice";
+import axios from "../utils/axios";
 
 const FormField = (props: { children: React.ReactElement[] }) => (
   <Box
@@ -35,15 +39,19 @@ const FormField = (props: { children: React.ReactElement[] }) => (
 );
 
 type FormValues = {
-  date: Dayjs;
-  itemName: "";
-  qty: number;
-  codenumber: string;
-  price: number;
-  image: File;
+  productName: string;
+  quantity: number;
+  sellingPrice: number;
+  codeNumber: string;
+  image: File | undefined;
+  status: string;
+  createdAt: Dayjs;
 };
 
-function OrderRequestForm(props: { handleCancel: () => void }) {
+function OrderRequestForm(props: {
+  handleCancel: () => void;
+  initialValues: any;
+}) {
   const [performingAction, setPerformingAction] = useState(false);
 
   const {
@@ -55,25 +63,23 @@ function OrderRequestForm(props: { handleCancel: () => void }) {
     getValues,
     reset,
   } = useForm<FormValues>({
-    defaultValues: {
-      date: dayjs(),
-      itemName: "",
-      qty: 0,
-      codenumber: "",
-      price: 0.0,
-    },
+    defaultValues: props?.initialValues,
   });
+
+  const user = useSelector(selectCurrentUser);
 
   const token = useSelector(selectCurrentToken);
 
+  const disabled = user?.role === "Admin" ? true : false;
+
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    const { itemName, qty, codenumber, price } = data;
+    const { productName, quantity, codeNumber, sellingPrice } = data;
 
     const requestBody = {
-      productName: itemName,
-      quantity: qty,
-      codeNumber: codenumber,
-      sellingPrice: price,
+      productName: productName,
+      quantity: quantity,
+      codeNumber: codeNumber,
+      sellingPrice: sellingPrice,
       status: "pending",
       image: "https://example.com/product-image.jpg",
     };
@@ -98,6 +104,19 @@ function OrderRequestForm(props: { handleCancel: () => void }) {
 
   const fileUploaded = watch("image");
 
+  const changeStatus = (status: string) => {
+    try {
+      const response = axios.put(
+        `http://localhost:5000/admin/approve-or-reject-request/${props.initialValues._id}`,
+        {
+          status: status,
+        }
+      );
+
+      console.log(response);
+    } catch (err) {}
+  };
+
   return (
     <Container>
       <Box sx={{ py: 3, my: 3 }}>
@@ -111,34 +130,13 @@ function OrderRequestForm(props: { handleCancel: () => void }) {
           sx={{ mt: 1 }}
         >
           <Grid container spacing={3} columnSpacing={10}>
-            <Grid item xs={6}>
-              <FormField>
-                <InputLabel>Date</InputLabel>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <Controller
-                    name="date"
-                    control={control}
-                    render={({ field }) => (
-                      <DatePicker
-                        slotProps={{ textField: { size: "small" } }}
-                        sx={{
-                          width: "100%",
-                          ".MuiPickersToolbar-content": { py: 0 },
-                        }}
-                        {...field}
-                        value={dayjs(field.value)}
-                      />
-                    )}
-                  />
-                </LocalizationProvider>
-              </FormField>
-            </Grid>
+            <Grid item xs={6}></Grid>
             <Grid item xs={6}></Grid>
             <Grid item xs={6}>
               <FormField>
-                <InputLabel>Item Name</InputLabel>
+                <InputLabel>Product Name</InputLabel>
                 <Controller
-                  name="itemName"
+                  name="productName"
                   control={control}
                   render={({
                     field: { onChange, value },
@@ -152,6 +150,7 @@ function OrderRequestForm(props: { handleCancel: () => void }) {
                       value={value}
                       fullWidth
                       variant="outlined"
+                      disabled={disabled}
                     />
                   )}
                 />
@@ -162,7 +161,7 @@ function OrderRequestForm(props: { handleCancel: () => void }) {
                 <InputLabel>Qunatity</InputLabel>
                 <Controller
                   rules={{ required: true }}
-                  name="qty"
+                  name="quantity"
                   control={control}
                   render={({
                     field: { onChange, value },
@@ -177,6 +176,7 @@ function OrderRequestForm(props: { handleCancel: () => void }) {
                       value={value}
                       variant="outlined"
                       sx={{ maxWidth: "150px" }}
+                      disabled={disabled}
                     />
                   )}
                 />
@@ -186,7 +186,7 @@ function OrderRequestForm(props: { handleCancel: () => void }) {
               <FormField>
                 <InputLabel>Code Number</InputLabel>
                 <Controller
-                  name="codenumber"
+                  name="codeNumber"
                   control={control}
                   render={({
                     field: { onChange, value },
@@ -200,6 +200,7 @@ function OrderRequestForm(props: { handleCancel: () => void }) {
                       value={value}
                       fullWidth
                       variant="outlined"
+                      disabled={disabled}
                     />
                   )}
                 />
@@ -210,7 +211,7 @@ function OrderRequestForm(props: { handleCancel: () => void }) {
               <FormField>
                 <InputLabel>Price</InputLabel>
                 <Controller
-                  name="price"
+                  name="sellingPrice"
                   control={control}
                   render={({
                     field: { onChange, value },
@@ -224,6 +225,7 @@ function OrderRequestForm(props: { handleCancel: () => void }) {
                       value={value}
                       fullWidth
                       variant="outlined"
+                      disabled={disabled}
                       sx={{
                         "& .MuiOutlinedInput-root": {
                           paddingLeft: 0,
@@ -328,37 +330,83 @@ function OrderRequestForm(props: { handleCancel: () => void }) {
               alignItems: "center",
             }}
           >
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              sx={{
-                mt: 3,
-                ml: 4,
-                minWidth: "100px",
-              }}
-              // disabled={performingAction ? true : false}
-            >
-              {performingAction ? (
-                <CircularProgress color="inherit" size="1.5rem" />
-              ) : (
-                `Save`
-              )}
-            </Button>
+            {user?.role === "Admin" ? (
+              <Button
+                type="submit"
+                variant="contained"
+                color="success"
+                sx={{
+                  mt: 3,
+                  ml: 4,
+                  minWidth: "100px",
+                }}
+                // disabled={performingAction ? true : false}
+                onClick={() => changeStatus("Approved")}
+              >
+                {performingAction ? (
+                  <CircularProgress color="inherit" size="1.5rem" />
+                ) : (
+                  `Approve`
+                )}
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                sx={{
+                  mt: 3,
+                  ml: 4,
+                  minWidth: "100px",
+                }}
+                // disabled={performingAction ? true : false}
+              >
+                {performingAction ? (
+                  <CircularProgress color="inherit" size="1.5rem" />
+                ) : (
+                  `Save`
+                )}
+              </Button>
+            )}
 
-            <Button
-              variant="outlined"
-              color="secondary"
-              sx={{
-                mt: 3,
-                ml: 4,
-                minWidth: "100px",
-              }}
-              onClick={props.handleCancel}
-              // disabled={performingAction ? true : false}
-            >
-              Cancel
-            </Button>
+            {user?.role === "Admin" ? (
+              <Button
+                type="submit"
+                variant="contained"
+                color="error"
+                onClick={() => changeStatus("Rejected")}
+                sx={{
+                  mt: 3,
+                  ml: 4,
+                  minWidth: "100px",
+                }}
+                // disabled={performingAction ? true : false}
+              >
+                {performingAction ? (
+                  <CircularProgress color="inherit" size="1.5rem" />
+                ) : (
+                  `Reject`
+                )}
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                sx={{
+                  mt: 3,
+                  ml: 4,
+                  minWidth: "100px",
+                }}
+                onClick={props.handleCancel}
+              >
+                {performingAction ? (
+                  <CircularProgress color="inherit" size="1.5rem" />
+                ) : (
+                  `Save`
+                )}
+              </Button>
+            )}
           </Box>
         </Box>
         <br />

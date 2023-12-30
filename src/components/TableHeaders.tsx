@@ -63,16 +63,6 @@ export const Columns: ColumnDef<any, any>[] = [
       return <span>{data.row.original.status}</span>;
     },
   },
-  {
-    header: "Actions",
-    cell: () => {
-      return (
-        <IconButton aria-label="More" color="secondary" size="small">
-          <MoreOutlinedIcon />
-        </IconButton>
-      );
-    },
-  },
 
   // You can follow the structure to display other data such as country and status
 ];

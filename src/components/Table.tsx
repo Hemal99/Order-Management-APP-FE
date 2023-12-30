@@ -14,6 +14,7 @@ import {
   // styled,
   InputAdornment,
   TablePagination,
+  Button,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { styled } from "@mui/material/styles";
@@ -39,12 +40,6 @@ export const StyledTableRow = styled(TableRow)`
   }
 `;
 
-// export const StyledPagination = styled(Pagination)`
-//   display: flex;
-//   justify-content: center;
-//   margin-top: 1rem;
-// `;
-
 // Typescript interface
 
 interface TableProps {
@@ -62,6 +57,8 @@ interface TableProps {
   EmptyText?: string;
   children?: React.ReactNode | React.ReactElement;
   handleRow?: () => void;
+  setModalOpen: (value: boolean) => void;
+  setInitialValues: (value: any) => void;
 }
 
 // The main table
@@ -80,6 +77,8 @@ const TableUI: FC<TableProps> = ({
   // children,
 
   handleRow,
+  setModalOpen,
+  setInitialValues,
 }) => {
   const [paginationPage, setPaginationPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -124,6 +123,12 @@ const TableUI: FC<TableProps> = ({
   ) => {
     setRowsPerPage(+event.target.value);
     setPaginationPage(0);
+  };
+
+  const handleOpenModal = (row: any) => {
+    setModalOpen(true);
+    console.log(row);
+    setInitialValues(row);
   };
 
   return (
@@ -171,6 +176,9 @@ const TableUI: FC<TableProps> = ({
                           )}
                     </TableCell>
                   ))}
+                  <TableCell>
+                    <span>Actions</span>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableHead>
@@ -190,6 +198,15 @@ const TableUI: FC<TableProps> = ({
                       )}
                     </TableCell>
                   ))}
+                  <TableCell>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => handleOpenModal(row?.original)}
+                    >
+                      View
+                    </Button>
+                  </TableCell>
                 </StyledTableRow>
               ))
             ) : (

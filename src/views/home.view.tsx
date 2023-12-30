@@ -23,6 +23,13 @@ const Home = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPageCount, setTotalPageCount] = useState(1);
   const [modalOpen, setModalOpen] = React.useState(false);
+  const [initialValues, setInitialValues] = useState({
+    productName: "",
+    quantity: "",
+    sellingPrice: "",
+    codeNumber: "",
+    image: "",
+  });
 
   const handleClickOpen = () => {
     setModalOpen(true);
@@ -83,10 +90,16 @@ const Home = () => {
             isFetching={loading}
             pageCount={totalPageCount}
             page={handlePageChange}
+            setModalOpen={setModalOpen}
+            setInitialValues={setInitialValues}
           />
         </Box>
       </Container>
-      <OrderRequestFormDialog open={modalOpen} handleClose={handleClose} />
+      <OrderRequestFormDialog
+        open={modalOpen}
+        handleClose={handleClose}
+        initialValues={initialValues}
+      />
     </>
   );
 };

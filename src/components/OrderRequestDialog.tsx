@@ -21,6 +21,7 @@ const Transition = React.forwardRef(function Transition(
 export default function OrderRequestFormDialog(props: {
   open: boolean;
   handleClose: () => void;
+  initialValues: any;
 }) {
   return (
     <>
@@ -45,7 +46,10 @@ export default function OrderRequestFormDialog(props: {
             </Typography>
           </Toolbar>
         </AppBar>
-        <OrderRequestForm handleCancel={props.handleClose}></OrderRequestForm>
+        <OrderRequestForm
+          handleCancel={props.handleClose}
+          initialValues={props?.initialValues}
+        />
       </Dialog>
     </>
   );
