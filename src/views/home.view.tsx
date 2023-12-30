@@ -1,7 +1,91 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import AppBarDrawer from "../components/AppBarDrawer";
+import { Container, Button, Box } from "@mui/material";
+import Table from "../components/Table";
+import { Columns } from "../components/TableHeaders";
+import { sampleData } from "../components/sampleData";
+import OrderRequestFormDialog from "../components/OrderRequestDialog";
+
+type dataRow = {
+  date: string;
+  ItemName: string;
+  qty: number;
+  price: string;
+  CodeNumber: string;
+  image: string;
+};
 
 const Home = () => {
-  return <div>Home - Logged in</div>;
+  // Initiate your states
+  const [items, setItems] = useState<dataRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPageCount, setTotalPageCount] = useState(1);
+  const [modalOpen, setModalOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setModalOpen(true);
+  };
+
+  const handleClose = () => {
+    setModalOpen(false);
+  };
+
+  // For pagination, define maximum of data per page
+
+  const ITEMS_PER_PAGE = 10;
+
+  // useEffect to get the data
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // If you have an API, do your normal axios or fetch
+
+        const response = await sampleData;
+        setItems(response);
+
+        setTotalPageCount(10 / ITEMS_PER_PAGE);
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [currentPage]);
+
+  const handlePageChange = (page: any) => {
+    setCurrentPage(page);
+  };
+
+  return (
+    <>
+      <AppBarDrawer title="Dashboard" />
+      <Container>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
+          <Button variant="contained" color="primary" onClick={handleClickOpen}>
+            New order Request
+          </Button>
+        </Box>
+
+        <Box>
+          <Table
+            data={items}
+            columns={Columns}
+            searchLabel="Search by Name or job title"
+            EmptyText="No staff found!"
+            isFetching={loading}
+            pageCount={totalPageCount}
+            page={handlePageChange}
+          />
+        </Box>
+      </Container>
+      <OrderRequestFormDialog open={modalOpen} handleClose={handleClose} />
+    </>
+  );
 };
 
 export default Home;

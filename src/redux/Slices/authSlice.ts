@@ -14,6 +14,16 @@ type AuthState = {
   token: string | null;
 };
 
+// const sampleUser = {
+//   name: "pushpitha",
+//   email: "pushpitha@gmail.com",
+//   role: "admin",
+//   id: "1",
+//   isEmailVerified: false,
+// };
+
+// const sampleToken = "sda";
+
 const initialState: AuthState = {
   user: null,
   token: null,

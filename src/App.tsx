@@ -5,6 +5,7 @@ import Home from "./views/home.view";
 import Login from "./views/login.view";
 import RequireAuth from "./components/Requireauth";
 import Unauthorized from "./views/unauthorized.view";
+import OrderRequest from "./views/orderRequest.view";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           {/* protected routes */}
           <Route element={<RequireAuth allowedRoles={["admin"]} />}>
             <Route path="/" element={<Home />} />
+            <Route path="/order-request" element={<OrderRequest />} />
           </Route>
         </Routes>
       </Router>

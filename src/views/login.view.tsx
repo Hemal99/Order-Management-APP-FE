@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -14,12 +14,10 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useNavigate } from "react-router-dom";
-
-import { useDispatch } from "react-redux";
-import { setCredentials } from "../redux/Slices/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { setCredentials, selectCurrentUser } from "../redux/Slices/authSlice";
 import { useLoginMutation } from "../api/auth.api";
-import { selectCurrentUser } from "../redux/Slices/authSlice";
-import { useSelector } from "react-redux";
+import { useForm, SubmitHandler } from "react-hook-form";
 
 function Copyright(props: any) {
   return (
@@ -31,7 +29,7 @@ function Copyright(props: any) {
     >
       {"Copyright © "}
       <Link color="inherit" href="https://mui.com/">
-        Your Website
+        Order Management App
       </Link>{" "}
       {new Date().getFullYear()}
       {"."}
@@ -39,46 +37,61 @@ function Copyright(props: any) {
   );
 }
 
+type Inputs = {
+  email: string;
+  password: string;
+};
+
+type LoginError = {
+  status: number;
+  data: {
+    msg: string;
+  };
+};
+
 export default function Login() {
-  const userRef = useRef();
-  // const errRef = useRef();
-  const [user, setUser] = useState("");
-  const [pwd, setPwd] = useState("");
-  const [errMsg, setErrMsg] = useState("");
   const navigate = useNavigate();
+  const [loginErr, setLoginErr] = useState("");
 
   const [login, { isLoading }] = useLoginMutation();
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    setErrMsg("");
-  }, [user, pwd]);
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<Inputs>();
 
-  const handleSubmit = async (e: React.SyntheticEvent) => {
-    e.preventDefault();
+  console.log(watch("email"));
+
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    const { email, password } = data;
+    setLoginErr("");
 
     try {
-      const userData = await login({ email: user, password: pwd }).unwrap();
+      const userData = await login({
+        email: email,
+        password: password,
+      }).unwrap();
       console.log(userData);
       dispatch(
         setCredentials({
-          user: userData.user,
-          token: userData.tokens.access.token,
+          user: {
+            name: "pushpitha",
+            email: "admin@gmail.com",
+            role: "admin",
+            id: userData.id,
+            isEmailVerified: false,
+          },
+          accessToken: userData.signature,
         })
       );
-      setUser("");
-      setPwd("");
       navigate("/");
-    } catch (err) {
-      console.log(err);
+    } catch (error) {
+      setLoginErr((error as LoginError).data?.msg);
     }
   };
-
-  const handleUserInput = (e: React.ChangeEvent<HTMLTextAreaElement>) =>
-    setUser(e.target.value);
-
-  const handlePwdInput = (e: React.ChangeEvent<HTMLTextAreaElement>) =>
-    setPwd(e.target.value);
 
   if (useSelector(selectCurrentUser)) {
     navigate("/");
@@ -91,8 +104,6 @@ export default function Login() {
       navigate("/");
     }
   }, [loggedInUser]);
-
-  console.log({ isLoading });
 
   return (
     <Grid container component="main" sx={{ height: "100vh" }}>
@@ -116,7 +127,7 @@ export default function Login() {
       <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
         <Box
           sx={{
-            my: 8,
+            my: 12,
             mx: 4,
             display: "flex",
             flexDirection: "column",
@@ -132,7 +143,7 @@ export default function Login() {
           <Box
             component="form"
             noValidate
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit(onSubmit)}
             sx={{ mt: 1 }}
           >
             <TextField
@@ -141,30 +152,28 @@ export default function Login() {
               fullWidth
               id="email"
               label="Email Address"
-              name="email"
               autoComplete="email"
-              inputRef={userRef}
-              value={user}
-              onChange={handleUserInput}
+              {...register("email", { required: "Email is required" })}
+              error={!!errors.email}
+              helperText={errors.email?.message}
             />
             <TextField
               margin="normal"
               required
               fullWidth
-              name="password"
               label="Password"
               type="password"
               id="password"
-              autoComplete="current-password"
-              onChange={handlePwdInput}
-              value={pwd}
+              {...register("password", { required: "Password is required" })}
+              error={!!errors.password}
+              helperText={errors.password?.message}
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
               label="Remember me"
             />
             <Typography variant="overline" display="block" gutterBottom>
-              {errMsg}
+              {loginErr}
             </Typography>
             <Button
               type="submit"
@@ -184,11 +193,6 @@ export default function Login() {
               <Grid item xs>
                 <Link href="#" variant="body2">
                   Forgot password?
-                </Link>
-              </Grid>
-              <Grid item>
-                <Link href="#" variant="body2">
-                  {"Don't have an account? Sign Up"}
                 </Link>
               </Grid>
             </Grid>
