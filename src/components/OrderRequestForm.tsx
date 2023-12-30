@@ -332,7 +332,6 @@ function OrderRequestForm(props: {
           >
             {user?.role === "Admin" ? (
               <Button
-                type="submit"
                 variant="contained"
                 color="success"
                 sx={{
@@ -371,7 +370,6 @@ function OrderRequestForm(props: {
 
             {user?.role === "Admin" ? (
               <Button
-                type="submit"
                 variant="contained"
                 color="error"
                 onClick={() => changeStatus("Rejected")}
