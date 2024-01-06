@@ -27,6 +27,10 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { FC, memo, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
+import { setFormState, setRequestId } from "../redux/Slices/requestFromSlice";
+import { useSelector } from "react-redux";
+import { selectCurrentUserRole } from "../redux/Slices/authSlice";
 
 // Styles with styled-component
 
@@ -125,9 +129,18 @@ const TableUI: FC<TableProps> = ({
     setPaginationPage(0);
   };
 
+  const dispatch = useDispatch();
+  const userRole = useSelector(selectCurrentUserRole);
+
   const handleOpenModal = (row: any) => {
     setModalOpen(true);
     console.log(row);
+    dispatch(setRequestId(row?._id));
+    if (userRole === "admin") {
+      dispatch(setFormState("view"));
+    } else {
+      dispatch(setFormState("edit"));
+    }
     setInitialValues(row);
   };
 

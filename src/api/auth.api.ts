@@ -3,7 +3,7 @@ import { RootState } from "../redux/store";
 
 export const authApi = createApi({
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:5000/admin",
+    baseUrl: "http://localhost:5000",
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).auth.token;
       if (token) {

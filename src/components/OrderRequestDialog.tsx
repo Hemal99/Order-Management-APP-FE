@@ -47,7 +47,7 @@ export default function OrderRequestFormDialog(props: {
           </Toolbar>
         </AppBar>
         <OrderRequestForm
-          handleCancel={props.handleClose}
+          handleClose={props.handleClose}
           initialValues={props?.initialValues}
         />
       </Dialog>

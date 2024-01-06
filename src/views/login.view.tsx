@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -14,8 +14,8 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { setCredentials, selectCurrentUser } from "../redux/Slices/authSlice";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "../redux/Slices/authSlice";
 import { useLoginMutation } from "../api/auth.api";
 import { useForm, SubmitHandler } from "react-hook-form";
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Typography,
@@ -12,10 +12,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import dayjs, { Dayjs } from "dayjs";
+import { Dayjs } from "dayjs";
 import ClearIcon from "@mui/icons-material/Clear";
 import { useSelector } from "react-redux";
 import {
@@ -23,6 +20,14 @@ import {
   selectCurrentUser,
 } from "../redux/Slices/authSlice";
 import axios from "../utils/axios";
+import { uploadImagetoFirebase } from "../firebase";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../redux/store";
+import { fetchDataThunk } from "../redux/Slices/tableSlice";
+import {
+  selectCurrentFromState,
+  selectCurrentRequestId,
+} from "../redux/Slices/requestFromSlice";
 
 const FormField = (props: { children: React.ReactElement[] }) => (
   <Box
@@ -43,16 +48,22 @@ type FormValues = {
   quantity: number;
   sellingPrice: number;
   codeNumber: string;
-  image: File | undefined;
+  image?: File;
   status: string;
   createdAt: Dayjs;
 };
 
 function OrderRequestForm(props: {
-  handleCancel: () => void;
   initialValues: any;
+  handleClose: () => void;
 }) {
   const [performingAction, setPerformingAction] = useState(false);
+  const [imgUrl, setImgUrl] = useState<string | null>(
+    props.initialValues?.image
+  );
+  const [fileUploaded, setFileUploaded] = useState(false);
+
+  console.log(props.initialValues);
 
   const {
     handleSubmit,
@@ -61,19 +72,26 @@ function OrderRequestForm(props: {
     control,
     watch,
     getValues,
-    reset,
+    resetField,
   } = useForm<FormValues>({
     defaultValues: props?.initialValues,
   });
 
   const user = useSelector(selectCurrentUser);
+  const currentFormState = useSelector(selectCurrentFromState);
+  const requestId = useSelector(selectCurrentRequestId);
 
   const token = useSelector(selectCurrentToken);
+  const dispatch = useDispatch<AppDispatch>();
 
   const disabled = user?.role === "Admin" ? true : false;
 
-  const onSubmit: SubmitHandler<FormValues> = (data) => {
+  const viewOnly = user?.role === "Admin" ? true : false;
+
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
     const { productName, quantity, codeNumber, sellingPrice } = data;
+
+    console.log("submit fired");
 
     const requestBody = {
       productName: productName,
@@ -81,38 +99,82 @@ function OrderRequestForm(props: {
       codeNumber: codeNumber,
       sellingPrice: sellingPrice,
       status: "pending",
-      image: "https://example.com/product-image.jpg",
+      image: imgUrl,
     };
     setPerformingAction(true);
-    fetch("http://localhost:5000/user/add-request", {
-      method: "POST",
-      body: JSON.stringify(requestBody),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-        authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => {
+    try {
+      if (currentFormState == "add") {
+        const res = await fetch("http://localhost:5000/user/add-request", {
+          method: "POST",
+          body: JSON.stringify(requestBody),
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+            authorization: `Bearer ${token}`,
+          },
+        });
         console.log(res);
-        setPerformingAction(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setPerformingAction(false);
-      });
+      }
+
+      if (currentFormState == "edit") {
+        const res = await fetch(
+          `http://localhost:5000/user/edit-request/${requestId}`,
+          {
+            method: "PUT",
+            body: JSON.stringify(requestBody),
+            headers: {
+              "Content-type": "application/json; charset=UTF-8",
+              authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log(res);
+      }
+    } catch (error) {
+      console.log(error);
+      setPerformingAction(false);
+    }
+    setPerformingAction(false);
+    props.handleClose();
+    dispatch(fetchDataThunk());
   };
 
-  const fileUploaded = watch("image");
+  useEffect(() => {
+    console.log({ fileUploaded, value: getValues("image") });
+    if (fileUploaded && getValues("image")) {
+      uploadImagetoFirebase(getValues("image"), getValues("image")?.name).then(
+        (url) => {
+          if (typeof url === "string") {
+            setImgUrl(url);
+          }
+        }
+      );
+    }
+  }, [fileUploaded]);
 
-  const changeStatus = (status: string) => {
+  useEffect(() => {
+    if (props.initialValues?.image) {
+      setFileUploaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (imgUrl) {
+      setFileUploaded(true);
+    }
+  }, [imgUrl]);
+
+  const changeStatus = async (status: string) => {
+    console.log("changing status");
     try {
-      const response = axios.put(
+      const response = await axios.put(
         `http://localhost:5000/admin/approve-or-reject-request/${props.initialValues._id}`,
         {
           status: status,
         }
       );
 
+      dispatch(fetchDataThunk());
+      props.handleClose();
       console.log(response);
     } catch (err) {}
   };
@@ -138,6 +200,7 @@ function OrderRequestForm(props: {
                 <Controller
                   name="productName"
                   control={control}
+                  rules={{ required: "A Product Name is required" }}
                   render={({
                     field: { onChange, value },
                     fieldState: { error },
@@ -160,7 +223,7 @@ function OrderRequestForm(props: {
               <FormField>
                 <InputLabel>Qunatity</InputLabel>
                 <Controller
-                  rules={{ required: true }}
+                  rules={{ required: "A Quantity is required" }}
                   name="quantity"
                   control={control}
                   render={({
@@ -188,6 +251,7 @@ function OrderRequestForm(props: {
                 <Controller
                   name="codeNumber"
                   control={control}
+                  rules={{ required: "Code Number is required" }}
                   render={({
                     field: { onChange, value },
                     fieldState: { error },
@@ -213,6 +277,7 @@ function OrderRequestForm(props: {
                 <Controller
                   name="sellingPrice"
                   control={control}
+                  rules={{ required: "Selling Price is required" }}
                   render={({
                     field: { onChange, value },
                     fieldState: { error },
@@ -263,60 +328,114 @@ function OrderRequestForm(props: {
             <Grid item xs={6}>
               <FormField>
                 <InputLabel>Image</InputLabel>
-                {!fileUploaded ? (
-                  <Controller
-                    control={control}
-                    name={"image"}
-                    rules={{ required: "Image is required" }}
-                    render={({ field: { onChange, ...field } }) => {
-                      return (
-                        <Button
-                          variant="contained"
-                          component="label"
-                          sx={{
-                            maxWidth: "280px",
-                            backgroundColor: "#dcdde1",
-                            color: "black",
-                            "&:hover": {
-                              backgroundColor: "#dcdde1",
-                              boxShadow: "none",
-                            },
-                            "&:active": {
-                              boxShadow: "none",
-                              backgroundColor: "#dcdde1",
-                            },
+                {viewOnly ? (
+                  <Box
+                    sx={{
+                      height: "200px",
+                      width: "360px",
+                      textAlign: "center",
+                    }}
+                  >
+                    <img
+                      src={props.initialValues?.image}
+                      alt="product"
+                      style={{ width: "100%", height: "100%" }}
+                    />
+                  </Box>
+                ) : (
+                  <div>
+                    {imgUrl ? (
+                      <Box
+                        sx={{
+                          height: "200px",
+                          width: "360px",
+                          textAlign: "center",
+                        }}
+                      >
+                        <img
+                          src={imgUrl}
+                          alt="product"
+                          style={{ height: "100%" }}
+                        />
+                      </Box>
+                    ) : (
+                      <></>
+                    )}
+                    {!fileUploaded ? (
+                      <Controller
+                        control={control}
+                        name={"image"}
+                        rules={{ required: "Image is required" }}
+                        render={({
+                          field: { onChange, ...field },
+                          fieldState: { error },
+                        }) => {
+                          return (
+                            <>
+                              <Button
+                                variant="contained"
+                                component="label"
+                                sx={{
+                                  maxWidth: "280px",
+                                  backgroundColor: "#dcdde1",
+                                  color: "black",
+                                  "&:hover": {
+                                    backgroundColor: "#dcdde1",
+                                    boxShadow: "none",
+                                  },
+                                  "&:active": {
+                                    boxShadow: "none",
+                                    backgroundColor: "#dcdde1",
+                                  },
+                                }}
+                              >
+                                Upload Image
+                                <input
+                                  {...field}
+                                  value={undefined}
+                                  onChange={async (
+                                    e: React.ChangeEvent<HTMLInputElement>
+                                  ) => {
+                                    onChange(e.currentTarget.files?.[0]);
+                                    setFileUploaded(true);
+                                  }}
+                                  type="file"
+                                  hidden
+                                />
+                              </Button>
+                              {error && (
+                                <Typography variant="subtitle2" color={"error"}>
+                                  {error.message}
+                                </Typography>
+                              )}
+                            </>
+                          );
+                        }}
+                      />
+                    ) : (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          mt: 3,
+                        }}
+                      >
+                        <Typography sx={{ fontWeight: "bold" }}>
+                          {getValues("image")?.name}
+                        </Typography>
+                        <IconButton
+                          edge="end"
+                          onClick={() => {
+                            resetField("image");
+                            setImgUrl(null);
+                            setFileUploaded(false);
                           }}
                         >
-                          Upload Image
-                          <input
-                            {...field}
-                            value={undefined}
-                            onChange={(
-                              e: React.ChangeEvent<HTMLInputElement>
-                            ) => {
-                              onChange(e.currentTarget.files?.[0]);
-                            }}
-                            type="file"
-                            hidden
-                          />
-                        </Button>
-                      );
-                    }}
-                  />
-                ) : (
-                  <Box
-                    sx={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <Typography>{getValues("image").name}</Typography>
-                    <IconButton
-                      edge="end"
-                      onClick={() => {
-                        reset({ image: undefined });
-                      }}
-                    >
-                      <ClearIcon />
-                    </IconButton>
-                  </Box>
+                          <ClearIcon />
+                        </IconButton>
+                      </Box>
+                    )}
+                  </div>
                 )}
               </FormField>
             </Grid>
@@ -339,7 +458,7 @@ function OrderRequestForm(props: {
                   ml: 4,
                   minWidth: "100px",
                 }}
-                // disabled={performingAction ? true : false}
+                disabled={performingAction}
                 onClick={() => changeStatus("Approved")}
               >
                 {performingAction ? (
@@ -358,7 +477,7 @@ function OrderRequestForm(props: {
                   ml: 4,
                   minWidth: "100px",
                 }}
-                // disabled={performingAction ? true : false}
+                disabled={performingAction}
               >
                 {performingAction ? (
                   <CircularProgress color="inherit" size="1.5rem" />
@@ -370,7 +489,7 @@ function OrderRequestForm(props: {
 
             {user?.role === "Admin" ? (
               <Button
-                variant="contained"
+                variant="outlined"
                 color="error"
                 onClick={() => changeStatus("Rejected")}
                 sx={{
@@ -378,7 +497,7 @@ function OrderRequestForm(props: {
                   ml: 4,
                   minWidth: "100px",
                 }}
-                // disabled={performingAction ? true : false}
+                disabled={performingAction}
               >
                 {performingAction ? (
                   <CircularProgress color="inherit" size="1.5rem" />
@@ -388,21 +507,17 @@ function OrderRequestForm(props: {
               </Button>
             ) : (
               <Button
-                type="submit"
-                variant="contained"
+                variant="outlined"
                 color="primary"
                 sx={{
                   mt: 3,
                   ml: 4,
                   minWidth: "100px",
                 }}
-                onClick={props.handleCancel}
+                onClick={props.handleClose}
+                disabled={performingAction}
               >
-                {performingAction ? (
-                  <CircularProgress color="inherit" size="1.5rem" />
-                ) : (
-                  `Save`
-                )}
+                Cancel
               </Button>
             )}
           </Box>

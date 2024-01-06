@@ -3,6 +3,8 @@ import { userApi } from "../api/user.api";
 import { valueApi } from "../api";
 import { authApi } from "../api/auth.api";
 import authReducer from "../redux/Slices/authSlice";
+import tableReducer from "../redux/Slices/tableSlice";
+import requestFormreducer from "../redux/Slices/requestFromSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +12,8 @@ export const store = configureStore({
     [valueApi.reducerPath]: valueApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
     auth: authReducer,
+    table: tableReducer,
+    requestForm: requestFormreducer,
   },
   middleware: (gDM) =>
     gDM().concat(userApi.middleware, valueApi.middleware, authApi.middleware),

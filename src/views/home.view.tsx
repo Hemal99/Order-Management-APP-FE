@@ -3,9 +3,12 @@ import AppBarDrawer from "../components/AppBarDrawer";
 import { Container, Button, Box } from "@mui/material";
 import Table from "../components/Table";
 import { Columns } from "../components/TableHeaders";
-import { sampleData } from "../components/sampleData";
 import OrderRequestFormDialog from "../components/OrderRequestDialog";
-import axios from "../utils/axios";
+import { useDispatch, useSelector } from "react-redux";
+import { selectTableState } from "../redux/Slices/tableSlice";
+import { fetchDataThunk } from "../redux/Slices/tableSlice";
+import { AppDispatch } from "../redux/store";
+import { setFormState, setRequestId } from "../redux/Slices/requestFromSlice";
 
 type dataRow = {
   date: string;
@@ -18,8 +21,8 @@ type dataRow = {
 
 const Home = () => {
   // Initiate your states
-  const [items, setItems] = useState<dataRow[]>([]);
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const { tableData, loading, error } = useSelector(selectTableState);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPageCount, setTotalPageCount] = useState(1);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -31,12 +34,22 @@ const Home = () => {
     image: "",
   });
 
-  const handleClickOpen = () => {
+  const addRequest = () => {
     setModalOpen(true);
+    dispatch(setFormState("add"));
   };
 
   const handleClose = () => {
     setModalOpen(false);
+    dispatch(setFormState("add"));
+    dispatch(setRequestId(null));
+    setInitialValues({
+      productName: "",
+      quantity: "",
+      sellingPrice: "",
+      codeNumber: "",
+      image: "",
+    });
   };
 
   // For pagination, define maximum of data per page
@@ -44,46 +57,33 @@ const Home = () => {
   const ITEMS_PER_PAGE = 10;
 
   // useEffect to get the data
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      // If you have an API, do your normal axios or fetch
-
-      const { data } = await axios.get("/user/get-all-request");
-      console.log(data);
-      setItems(data);
-
-      setTotalPageCount(10 / ITEMS_PER_PAGE);
-
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    dispatch(fetchDataThunk());
+  }, [dispatch]);
 
   useEffect(() => {
-    fetchData();
-  }, [currentPage]);
+    setTotalPageCount(10 / ITEMS_PER_PAGE);
+  }, [tableData]);
 
   const handlePageChange = (page: any) => {
     setCurrentPage(page);
   };
+
+  console.log({ initialValues });
 
   return (
     <>
       <AppBarDrawer title="Dashboard" />
       <Container>
         <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
-          <Button variant="contained" color="primary" onClick={handleClickOpen}>
+          <Button variant="contained" color="primary" onClick={addRequest}>
             New order Request
           </Button>
         </Box>
 
         <Box>
           <Table
-            data={items}
+            data={tableData}
             columns={Columns}
             searchLabel="Search by Name or job title"
             EmptyText="No staff found!"

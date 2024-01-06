@@ -10,7 +10,7 @@ const RequireAuth = (props: { allowedRoles: string[] }) => {
   const role = useSelector(selectCurrentUserRole);
   const location = useLocation();
 
-  console.log("token", token);
+  console.log("token", token, props.allowedRoles, role);
 
   // if (role && props.allowedRoles?.includes(role)) {
   //   return <Outlet />;
