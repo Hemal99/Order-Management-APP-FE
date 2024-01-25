@@ -3,13 +3,13 @@ import { RootState } from "../store";
 
 type requestFormState = {
   formState: "add" | "edit" | "view";
-  initialValues: any;
+  values: any;
   requetsId?: string;
 };
 
 const initialState: requestFormState = {
   formState: "add",
-  initialValues: {},
+  values: {},
   requetsId: undefined,
 };
 
@@ -22,14 +22,21 @@ const requestFormSlice = createSlice({
     },
     setRequestId: (state, action) => {
       state.requetsId = action.payload;
-    }
+    },
+    setCurrentValues: (state, action) => {
+      state.values = action.payload;
+    },
   },
 });
 
-export const { setFormState, setRequestId } = requestFormSlice.actions;
+export const { setFormState, setRequestId, setCurrentValues } =
+  requestFormSlice.actions;
 
 export default requestFormSlice.reducer;
 
-export const selectCurrentFromState = (state: RootState) => state.requestForm.formState;
-export const selectCurrentValues = (state: RootState) => state.requestForm.initialValues;
-export const selectCurrentRequestId = (state: RootState) => state.requestForm.requetsId;
+export const selectCurrentFromState = (state: RootState) =>
+  state.requestForm.formState;
+export const selectCurrentValues = (state: RootState) =>
+  state.requestForm.values;
+export const selectCurrentRequestId = (state: RootState) =>
+  state.requestForm.requetsId;

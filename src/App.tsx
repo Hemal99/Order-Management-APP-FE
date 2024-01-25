@@ -8,8 +8,15 @@ import Unauthorized from "./views/unauthorized.view";
 import OrderRequest from "./views/orderRequest.view";
 
 import Auth from "./components/Auth/Auth";
+import Users from "./views/users.view";
+import { selectCurrentUser } from "./redux/Slices/authSlice";
+import { useSelector } from "react-redux";
+import PermissibleRender from "./components/PermissibleRender";
+import SnackBar from "./components/Feedback/SnackBar";
 
 function App() {
+  const currentUser = useSelector(selectCurrentUser);
+
   return (
     <div className="app">
       <Auth>
@@ -21,9 +28,21 @@ function App() {
             <Route element={<RequireAuth allowedRoles={["admin"]} />}>
               <Route path="/" element={<Home />} />
               <Route path="/order-request" element={<OrderRequest />} />
+              <Route
+                path="/users"
+                element={
+                  <PermissibleRender
+                    userPermissions={currentUser?.role}
+                    requiredPermissions="Admin"
+                  >
+                    <Users />
+                  </PermissibleRender>
+                }
+              />
             </Route>
           </Routes>
         </Router>
+        <SnackBar />
       </Auth>
     </div>
   );

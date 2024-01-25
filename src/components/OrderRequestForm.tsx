@@ -27,7 +27,8 @@ import { fetchDataThunk } from "../redux/Slices/tableSlice";
 import {
   selectCurrentFromState,
   selectCurrentRequestId,
-} from "../redux/Slices/requestFromSlice";
+} from "../redux/Slices/requestFormSlice";
+import { setSnackbarOpen } from "../redux/Slices/snackBarslice";
 
 const FormField = (props: { children: React.ReactElement[] }) => (
   <Box
@@ -65,15 +66,7 @@ function OrderRequestForm(props: {
 
   console.log(props.initialValues);
 
-  const {
-    handleSubmit,
-    // register,
-    // formState: { errors },
-    control,
-    watch,
-    getValues,
-    resetField,
-  } = useForm<FormValues>({
+  const { handleSubmit, control, getValues, resetField } = useForm<FormValues>({
     defaultValues: props?.initialValues,
   });
 
@@ -83,10 +76,6 @@ function OrderRequestForm(props: {
 
   const token = useSelector(selectCurrentToken);
   const dispatch = useDispatch<AppDispatch>();
-
-  const disabled = user?.role === "Admin" ? true : false;
-
-  const viewOnly = user?.role === "Admin" ? true : false;
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     const { productName, quantity, codeNumber, sellingPrice } = data;
@@ -113,6 +102,7 @@ function OrderRequestForm(props: {
           },
         });
         console.log(res);
+        dispatch(setSnackbarOpen({ text: "Request Order Succesfully Created.", type: "success" }));
       }
 
       if (currentFormState == "edit") {
@@ -128,10 +118,12 @@ function OrderRequestForm(props: {
           }
         );
         console.log(res);
+        dispatch(setSnackbarOpen({ text: "Request Order Succesfully Edited.", type: "success" }));
       }
     } catch (error) {
       console.log(error);
       setPerformingAction(false);
+      dispatch(setSnackbarOpen({ text: "Failed to Saver", type: "error" }));
     }
     setPerformingAction(false);
     props.handleClose();
@@ -163,172 +155,152 @@ function OrderRequestForm(props: {
     }
   }, [imgUrl]);
 
-  const changeStatus = async (status: string) => {
-    console.log("changing status");
-    try {
-      const response = await axios.put(
-        `http://localhost:5000/admin/approve-or-reject-request/${props.initialValues._id}`,
-        {
-          status: status,
-        }
-      );
-
-      dispatch(fetchDataThunk());
-      props.handleClose();
-      console.log(response);
-    } catch (err) {}
-  };
-
   return (
-    <Container>
-      <Box sx={{ py: 3, my: 3 }}>
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          Create a New order
-        </Typography>
-        <Box
-          component="form"
-          noValidate
-          onSubmit={handleSubmit(onSubmit)}
-          sx={{ mt: 1 }}
-        >
-          <Grid container spacing={3} columnSpacing={10}>
-            <Grid item xs={6}></Grid>
-            <Grid item xs={6}></Grid>
-            <Grid item xs={6}>
-              <FormField>
-                <InputLabel>Product Name</InputLabel>
-                <Controller
-                  name="productName"
-                  control={control}
-                  rules={{ required: "A Product Name is required" }}
-                  render={({
-                    field: { onChange, value },
-                    fieldState: { error },
-                  }) => (
-                    <TextField
-                      helperText={error ? error.message : null}
-                      size="small"
-                      error={!!error}
-                      onChange={onChange}
-                      value={value}
-                      fullWidth
-                      variant="outlined"
-                      disabled={disabled}
-                    />
-                  )}
-                />
-              </FormField>
-            </Grid>
-            <Grid item xs={5}>
-              <FormField>
-                <InputLabel>Qunatity</InputLabel>
-                <Controller
-                  rules={{ required: "A Quantity is required" }}
-                  name="quantity"
-                  control={control}
-                  render={({
-                    field: { onChange, value },
-                    fieldState: { error },
-                  }) => (
-                    <TextField
-                      helperText={error ? error.message : null}
-                      size="small"
-                      error={!!error}
-                      onChange={(event) => onChange(+event.target.value)}
-                      type="number"
-                      value={value}
-                      variant="outlined"
-                      sx={{ maxWidth: "150px" }}
-                      disabled={disabled}
-                    />
-                  )}
-                />
-              </FormField>
-            </Grid>
-            <Grid item xs={6}>
-              <FormField>
-                <InputLabel>Code Number</InputLabel>
-                <Controller
-                  name="codeNumber"
-                  control={control}
-                  rules={{ required: "Code Number is required" }}
-                  render={({
-                    field: { onChange, value },
-                    fieldState: { error },
-                  }) => (
-                    <TextField
-                      helperText={error ? error.message : null}
-                      size="small"
-                      error={!!error}
-                      onChange={onChange}
-                      value={value}
-                      fullWidth
-                      variant="outlined"
-                      disabled={disabled}
-                    />
-                  )}
-                />
-              </FormField>
-            </Grid>
-            <Grid item xs={6}></Grid>
-            <Grid item xs={6}>
-              <FormField>
-                <InputLabel>Price</InputLabel>
-                <Controller
-                  name="sellingPrice"
-                  control={control}
-                  rules={{ required: "Selling Price is required" }}
-                  render={({
-                    field: { onChange, value },
-                    fieldState: { error },
-                  }) => (
-                    <TextField
-                      helperText={error ? error.message : null}
-                      size="small"
-                      error={!!error}
-                      onChange={onChange}
-                      value={value}
-                      fullWidth
-                      variant="outlined"
-                      disabled={disabled}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          paddingLeft: 0,
-                          // "&.Mui-focused": {
-                          //   "& .MuiInputAdornment-root": {
-                          //     color: "white",
-                          //     backgroundColor: (theme) => theme.palette.primary.main
-                          //   }
-                          // }
-                        },
-                      }}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment
-                            sx={{
-                              backgroundColor: "#dcdde1",
-                              padding: "20px 14px",
-                              borderTopLeftRadius: (theme) =>
-                                theme.shape.borderRadius + "px",
-                              borderBottomLeftRadius: (theme) =>
-                                theme.shape.borderRadius + "px",
-                            }}
-                            position="start"
-                          >
-                            AED
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  )}
-                />
-              </FormField>
-            </Grid>
-            <Grid item xs={6}></Grid>
-            <Grid item xs={6}>
-              <FormField>
-                <InputLabel>Image</InputLabel>
-                {viewOnly ? (
+    <Box sx={{ py: 2 }}>
+      <Typography variant="h6" sx={{ fontWeight: 600, mt: 5 }}>
+        Create New Order
+      </Typography>
+      <Box
+        component="form"
+        noValidate
+        onSubmit={handleSubmit(onSubmit)}
+        sx={{ mt: 1 }}
+      >
+        <Grid container spacing={3} columnSpacing={10}>
+          <Grid item xs={6}></Grid>
+          <Grid item xs={6}></Grid>
+          <Grid item xs={6}>
+            <FormField>
+              <InputLabel>Product Name</InputLabel>
+              <Controller
+                name="productName"
+                control={control}
+                rules={{ required: "A Product Name is required" }}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
+                  <TextField
+                    helperText={error ? error.message : null}
+                    size="small"
+                    error={!!error}
+                    onChange={onChange}
+                    value={value}
+                    fullWidth
+                    variant="outlined"
+                  />
+                )}
+              />
+            </FormField>
+          </Grid>
+          <Grid item xs={5}>
+            <FormField>
+              <InputLabel>Qunatity</InputLabel>
+              <Controller
+                rules={{ required: "A Quantity is required" }}
+                name="quantity"
+                control={control}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
+                  <TextField
+                    helperText={error ? error.message : null}
+                    size="small"
+                    error={!!error}
+                    onChange={(event) => onChange(+event.target.value)}
+                    type="number"
+                    value={value}
+                    variant="outlined"
+                    sx={{ maxWidth: "150px" }}
+                  />
+                )}
+              />
+            </FormField>
+          </Grid>
+          <Grid item xs={6}>
+            <FormField>
+              <InputLabel>Code Number</InputLabel>
+              <Controller
+                name="codeNumber"
+                control={control}
+                rules={{ required: "Code Number is required" }}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
+                  <TextField
+                    helperText={error ? error.message : null}
+                    size="small"
+                    error={!!error}
+                    onChange={onChange}
+                    value={value}
+                    fullWidth
+                    variant="outlined"
+                  />
+                )}
+              />
+            </FormField>
+          </Grid>
+          <Grid item xs={6}></Grid>
+          <Grid item xs={6}>
+            <FormField>
+              <InputLabel>Price</InputLabel>
+              <Controller
+                name="sellingPrice"
+                control={control}
+                rules={{ required: "Selling Price is required" }}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
+                  <TextField
+                    helperText={error ? error.message : null}
+                    size="small"
+                    error={!!error}
+                    onChange={onChange}
+                    value={value}
+                    fullWidth
+                    variant="outlined"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        paddingLeft: 0,
+                        // "&.Mui-focused": {
+                        //   "& .MuiInputAdornment-root": {
+                        //     color: "white",
+                        //     backgroundColor: (theme) => theme.palette.primary.main
+                        //   }
+                        // }
+                      },
+                    }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment
+                          sx={{
+                            backgroundColor: "#dcdde1",
+                            padding: "20px 14px",
+                            borderTopLeftRadius: (theme) =>
+                              theme.shape.borderRadius + "px",
+                            borderBottomLeftRadius: (theme) =>
+                              theme.shape.borderRadius + "px",
+                          }}
+                          position="start"
+                        >
+                          AED
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                )}
+              />
+            </FormField>
+          </Grid>
+          <Grid item xs={6}></Grid>
+          <Grid item xs={6}>
+            <FormField>
+              <InputLabel>Image</InputLabel>
+              <div>
+                {imgUrl ? (
                   <Box
                     sx={{
                       height: "200px",
@@ -337,194 +309,136 @@ function OrderRequestForm(props: {
                     }}
                   >
                     <img
-                      src={props.initialValues?.image}
+                      src={imgUrl}
                       alt="product"
-                      style={{ width: "100%", height: "100%" }}
+                      style={{ height: "100%" }}
                     />
                   </Box>
                 ) : (
-                  <div>
-                    {imgUrl ? (
-                      <Box
-                        sx={{
-                          height: "200px",
-                          width: "360px",
-                          textAlign: "center",
-                        }}
-                      >
-                        <img
-                          src={imgUrl}
-                          alt="product"
-                          style={{ height: "100%" }}
-                        />
-                      </Box>
-                    ) : (
-                      <></>
-                    )}
-                    {!fileUploaded ? (
-                      <Controller
-                        control={control}
-                        name={"image"}
-                        rules={{ required: "Image is required" }}
-                        render={({
-                          field: { onChange, ...field },
-                          fieldState: { error },
-                        }) => {
-                          return (
-                            <>
-                              <Button
-                                variant="contained"
-                                component="label"
-                                sx={{
-                                  maxWidth: "280px",
-                                  backgroundColor: "#dcdde1",
-                                  color: "black",
-                                  "&:hover": {
-                                    backgroundColor: "#dcdde1",
-                                    boxShadow: "none",
-                                  },
-                                  "&:active": {
-                                    boxShadow: "none",
-                                    backgroundColor: "#dcdde1",
-                                  },
-                                }}
-                              >
-                                Upload Image
-                                <input
-                                  {...field}
-                                  value={undefined}
-                                  onChange={async (
-                                    e: React.ChangeEvent<HTMLInputElement>
-                                  ) => {
-                                    onChange(e.currentTarget.files?.[0]);
-                                    setFileUploaded(true);
-                                  }}
-                                  type="file"
-                                  hidden
-                                />
-                              </Button>
-                              {error && (
-                                <Typography variant="subtitle2" color={"error"}>
-                                  {error.message}
-                                </Typography>
-                              )}
-                            </>
-                          );
-                        }}
-                      />
-                    ) : (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          mt: 3,
-                        }}
-                      >
-                        <Typography sx={{ fontWeight: "bold" }}>
-                          {getValues("image")?.name}
-                        </Typography>
-                        <IconButton
-                          edge="end"
-                          onClick={() => {
-                            resetField("image");
-                            setImgUrl(null);
-                            setFileUploaded(false);
-                          }}
-                        >
-                          <ClearIcon />
-                        </IconButton>
-                      </Box>
-                    )}
-                  </div>
+                  <></>
                 )}
-              </FormField>
-            </Grid>
+                {!fileUploaded ? (
+                  <Controller
+                    control={control}
+                    name={"image"}
+                    rules={{ required: "Image is required" }}
+                    render={({
+                      field: { onChange, ...field },
+                      fieldState: { error },
+                    }) => {
+                      return (
+                        <>
+                          <Button
+                            variant="contained"
+                            component="label"
+                            sx={{
+                              maxWidth: "280px",
+                              backgroundColor: "#dcdde1",
+                              color: "black",
+                              "&:hover": {
+                                backgroundColor: "#dcdde1",
+                                boxShadow: "none",
+                              },
+                              "&:active": {
+                                boxShadow: "none",
+                                backgroundColor: "#dcdde1",
+                              },
+                            }}
+                          >
+                            Upload Image
+                            <input
+                              {...field}
+                              value={undefined}
+                              onChange={async (
+                                e: React.ChangeEvent<HTMLInputElement>
+                              ) => {
+                                onChange(e.currentTarget.files?.[0]);
+                                setFileUploaded(true);
+                              }}
+                              type="file"
+                              hidden
+                            />
+                          </Button>
+                          {error && (
+                            <Typography variant="subtitle2" color={"error"}>
+                              {error.message}
+                            </Typography>
+                          )}
+                        </>
+                      );
+                    }}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      mt: 3,
+                    }}
+                  >
+                    <Typography sx={{ fontWeight: "bold" }}>
+                      {getValues("image")?.name}
+                    </Typography>
+                    <IconButton
+                      edge="end"
+                      onClick={() => {
+                        resetField("image");
+                        setImgUrl(null);
+                        setFileUploaded(false);
+                      }}
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  </Box>
+                )}
+              </div>
+            </FormField>
           </Grid>
-          <Box
+        </Grid>
+        <Box
+          sx={{
+            m: 4,
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "flex-end",
+            alignItems: "center",
+          }}
+        >
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
             sx={{
-              m: 4,
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "flex-end",
-              alignItems: "center",
+              mt: 3,
+              ml: 4,
+              minWidth: "100px",
             }}
+            disabled={performingAction}
           >
-            {user?.role === "Admin" ? (
-              <Button
-                variant="contained"
-                color="success"
-                sx={{
-                  mt: 3,
-                  ml: 4,
-                  minWidth: "100px",
-                }}
-                disabled={performingAction}
-                onClick={() => changeStatus("Approved")}
-              >
-                {performingAction ? (
-                  <CircularProgress color="inherit" size="1.5rem" />
-                ) : (
-                  `Approve`
-                )}
-              </Button>
+            {performingAction ? (
+              <CircularProgress color="inherit" size="1.5rem" />
             ) : (
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                sx={{
-                  mt: 3,
-                  ml: 4,
-                  minWidth: "100px",
-                }}
-                disabled={performingAction}
-              >
-                {performingAction ? (
-                  <CircularProgress color="inherit" size="1.5rem" />
-                ) : (
-                  `Save`
-                )}
-              </Button>
+              `Save`
             )}
+          </Button>
 
-            {user?.role === "Admin" ? (
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={() => changeStatus("Rejected")}
-                sx={{
-                  mt: 3,
-                  ml: 4,
-                  minWidth: "100px",
-                }}
-                disabled={performingAction}
-              >
-                {performingAction ? (
-                  <CircularProgress color="inherit" size="1.5rem" />
-                ) : (
-                  `Reject`
-                )}
-              </Button>
-            ) : (
-              <Button
-                variant="outlined"
-                color="primary"
-                sx={{
-                  mt: 3,
-                  ml: 4,
-                  minWidth: "100px",
-                }}
-                onClick={props.handleClose}
-                disabled={performingAction}
-              >
-                Cancel
-              </Button>
-            )}
-          </Box>
+          <Button
+            variant="outlined"
+            color="primary"
+            sx={{
+              mt: 3,
+              ml: 4,
+              minWidth: "100px",
+            }}
+            onClick={props.handleClose}
+            disabled={performingAction}
+          >
+            Cancel
+          </Button>
         </Box>
-        <br />
       </Box>
-    </Container>
+      <br />
+    </Box>
   );
 }
 

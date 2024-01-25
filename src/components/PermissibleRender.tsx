@@ -1,25 +1,22 @@
 import React from "react";
+import Unauthorized from "../views/unauthorized.view";
 
 function PermissibleRender(props: {
-  userPermissions: string[];
+  userPermissions?: string;
   requiredPermissions: string;
   children: React.ReactNode;
-  renderOtherwise: React.ReactNode;
 }) {
-  const { children, userPermissions, requiredPermissions, renderOtherwise } =
-    props;
+  const { children, userPermissions, requiredPermissions } = props;
 
   if (!children || !userPermissions || !requiredPermissions) {
-    return null;
+    return <Unauthorized />;
   }
 
   if (userPermissions.includes(requiredPermissions)) {
-    return children;
+    return <>{children}</>;
+  } else {
+    return <Unauthorized />;
   }
-  if (renderOtherwise) {
-    return renderOtherwise;
-  }
-  return null;
 }
 
 export default PermissibleRender;

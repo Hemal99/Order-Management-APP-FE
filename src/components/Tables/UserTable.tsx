@@ -27,14 +27,9 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { FC, memo, useMemo, useState } from "react";
+import axiosInstance from "../../utils/axios";
 import { useDispatch } from "react-redux";
-import {
-  setFormState,
-  setRequestId,
-  setCurrentValues,
-} from "../redux/Slices/requestFormSlice";
-import { useSelector } from "react-redux";
-import { selectCurrentUserRole } from "../redux/Slices/authSlice";
+import { setSnackbarOpen } from "../../redux/Slices/snackBarslice";
 
 // Styles with styled-component
 
@@ -65,8 +60,7 @@ interface TableProps {
   EmptyText?: string;
   children?: React.ReactNode | React.ReactElement;
   handleRow?: () => void;
-  setModalOpen: (value: boolean) => void;
-  setInitialValues: (value: any) => void;
+  fetchData: () => void;
 }
 
 // The main table
@@ -83,13 +77,12 @@ const TableUI: FC<TableProps> = ({
   page,
   EmptyText,
   // children,
-
   handleRow,
-  setModalOpen,
-  setInitialValues,
+  fetchData,
 }) => {
   const [paginationPage, setPaginationPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [performingAction, setPerformingAction] = useState(false);
 
   const memoizedData = useMemo(() => data, [data]);
   const memoizedColumns = useMemo(() => columns, [columns]);
@@ -97,6 +90,8 @@ const TableUI: FC<TableProps> = ({
   //   () => headerComponent,
   //   [headerComponent]
   // );
+
+  const dispatch = useDispatch();
 
   const { getHeaderGroups, getRowModel, getAllColumns } = useReactTable({
     data: memoizedData,
@@ -133,20 +128,22 @@ const TableUI: FC<TableProps> = ({
     setPaginationPage(0);
   };
 
-  const dispatch = useDispatch();
-  const userRole = useSelector(selectCurrentUserRole);
-
-  const handleOpenModal = (row: any) => {
-    setModalOpen(true);
+  const handleDelete = (row: any) => async () => {
     console.log(row);
-    dispatch(setRequestId(row?._id));
-    dispatch(setCurrentValues(row));
-    if (row.status === "pending") {
-      dispatch(setFormState("edit"));
-    } else {
-      dispatch(setFormState("view"));
+    setPerformingAction(true);
+    try {
+      const res = await axiosInstance.delete(`/user/delete-user/${row._id}`);
+      dispatch(
+        setSnackbarOpen({ text: "User deleted successfully", type: "success" })
+      );
+    } catch (error) {
+      console.log(error);
+      dispatch(
+        setSnackbarOpen({ text: "Failed to delete user", type: "error" })
+      );
     }
-    setInitialValues(row);
+    setPerformingAction(false);
+    fetchData();
   };
 
   return (
@@ -218,23 +215,12 @@ const TableUI: FC<TableProps> = ({
                   ))}
                   <TableCell>
                     <Button
-                      variant="outlined"
+                      variant="contained"
                       size="small"
-                      onClick={() => handleOpenModal(row?.original)}
+                      onClick={handleDelete(row.original)}
+                      disabled={performingAction}
                     >
-                      {userRole == "Admin" &&
-                        (row?.original.status === "pending"
-                          ? "Take Action"
-                          : "View")}
-                      {userRole == "Requester" &&
-                        (row?.original.status === "pending"
-                          ? "Edit"
-                          : "View")}
-                      {userRole == "Purchaser" &&
-                        (row?.original.status !== "pending" &&
-                        row?.original.status !== "Rejected"
-                          ? "Change Status"
-                          : "View")}
+                      Delete
                     </Button>
                   </TableCell>
                 </StyledTableRow>

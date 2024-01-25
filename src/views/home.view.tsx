@@ -1,28 +1,20 @@
 import React, { useState, useEffect } from "react";
 import AppBarDrawer from "../components/AppBarDrawer";
-import { Container, Button, Box } from "@mui/material";
+import { Container, Button, Box , Typography} from "@mui/material";
 import Table from "../components/Table";
 import { Columns } from "../components/TableHeaders";
-import OrderRequestFormDialog from "../components/OrderRequestDialog";
+import OrderRequestFormDialog from "../components/OrderDialog";
 import { useDispatch, useSelector } from "react-redux";
 import { selectTableState } from "../redux/Slices/tableSlice";
 import { fetchDataThunk } from "../redux/Slices/tableSlice";
 import { AppDispatch } from "../redux/store";
-import { setFormState, setRequestId } from "../redux/Slices/requestFromSlice";
-
-type dataRow = {
-  date: string;
-  ItemName: string;
-  qty: number;
-  price: string;
-  CodeNumber: string;
-  image: string;
-};
+import { setFormState, setRequestId } from "../redux/Slices/requestFormSlice";
+import { selectCurrentUser } from "../redux/Slices/authSlice";
 
 const Home = () => {
   // Initiate your states
   const dispatch = useDispatch<AppDispatch>();
-  const { tableData, loading, error } = useSelector(selectTableState);
+  const { tableData, loading } = useSelector(selectTableState);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPageCount, setTotalPageCount] = useState(1);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -69,18 +61,26 @@ const Home = () => {
     setCurrentPage(page);
   };
 
-  console.log({ initialValues });
+  console.log({ initialValues, currentPage });
+
+  const currentUser = useSelector(selectCurrentUser);
 
   return (
     <>
       <AppBarDrawer title="Dashboard" />
       <Container>
-        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
-          <Button variant="contained" color="primary" onClick={addRequest}>
-            New order Request
-          </Button>
-        </Box>
-
+        {currentUser?.role === "Requester" && (
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
+            <Button variant="contained" color="primary" onClick={addRequest}>
+              New order Request
+            </Button>
+          </Box>
+        )}
+        {currentUser?.role === "Admin" && (
+          <Box sx={{ display: "flex", justifyContent: "flex-start", mb: 3 }}>
+            <Typography> Pending Requests : 0</Typography>
+          </Box>
+        )}
         <Box>
           <Table
             data={tableData}

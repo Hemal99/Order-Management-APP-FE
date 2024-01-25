@@ -22,10 +22,7 @@ const app = initializeApp(firebaseConfig);
 // Initialize Cloud Storage and get a reference to the service
 const storage = getStorage(app);
 
-export const uploadImagetoFirebase = async (
-  file?: File,
-  fileName?: string
-) => {
+export const uploadImagetoFirebase = async (file?: File, fileName?: string) => {
   console.log({ file });
 
   if (!file || !fileName) return console.log("No file or fileName");

@@ -8,12 +8,17 @@ import {
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import AssignmentIcon from "@mui/icons-material/Assignment";
+import GroupIcon from "@mui/icons-material/Group";
+import { selectCurrentUser } from "../redux/Slices/authSlice";
+import { useSelector } from "react-redux";
 
 export default function NavDrawer(props: {
   open: boolean;
   onClose: () => void;
 }) {
   const { onClose, open } = props;
+
+  const currentUser = useSelector(selectCurrentUser);
 
   const DrawerLink = (props: {
     href: string;
@@ -40,6 +45,13 @@ export default function NavDrawer(props: {
           name="Logs"
           iconComponent={<AssignmentIcon />}
         />
+        {currentUser?.role === "Admin" && (
+          <DrawerLink
+            href="/users"
+            name="Users"
+            iconComponent={<GroupIcon />}
+          />
+        )}
       </List>
     </Drawer>
   );

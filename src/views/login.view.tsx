@@ -49,6 +49,11 @@ type LoginError = {
   };
 };
 
+type serverError = {
+  status: string;
+  error: string;
+};
+
 export default function Login() {
   const navigate = useNavigate();
   const [loginErr, setLoginErr] = useState("");
@@ -94,7 +99,11 @@ export default function Login() {
 
       navigate("/");
     } catch (error) {
-      setLoginErr((error as LoginError).data?.msg);
+      if ((error as serverError).status === "FETCH_ERROR") {
+        setLoginErr("server Unavailable");
+      } else {
+        setLoginErr((error as LoginError).data?.msg);
+      }
     }
   };
 

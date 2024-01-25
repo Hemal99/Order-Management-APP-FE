@@ -11,11 +11,13 @@ import Menu from "@mui/material/Menu";
 import NavDrawer from "./NavDrawer";
 import { useDispatch } from "react-redux";
 import { logOut } from "../redux/Slices/authSlice";
+import ResetPasswordDialog from "./Forms/ResetPasswordForm";
 
 export default function AppBarDrawer(props: { title: string }) {
   // const [auth, setAuth] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [navDrawerOpen, setNavDrawerOpen] = React.useState<boolean>(false);
+  const [resetPwOpen, setresetPwOpen] = React.useState<boolean>(false);
 
   // const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
   //   setAuth(event.target.checked);
@@ -43,6 +45,11 @@ export default function AppBarDrawer(props: { title: string }) {
     dispatch(logOut());
     sessionStorage.removeItem("accessToken");
     sessionStorage.removeItem("user");
+  };
+
+  const handleClickResetPW = () => {
+    setresetPwOpen(true);
+    handleClose();
   };
 
   return (
@@ -89,7 +96,7 @@ export default function AppBarDrawer(props: { title: string }) {
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
               >
-                <MenuItem onClick={handleClose}>Profile</MenuItem>
+                <MenuItem onClick={handleClickResetPW}>Reset Password</MenuItem>
                 <MenuItem onClick={handleLogOut}>Log Out</MenuItem>
               </Menu>
             </div>
@@ -97,6 +104,10 @@ export default function AppBarDrawer(props: { title: string }) {
         </AppBar>
       </Box>
       <NavDrawer open={navDrawerOpen} onClose={drawerClose} />
+      <ResetPasswordDialog
+        open={resetPwOpen}
+        handleClose={() => setresetPwOpen(false)}
+      />
     </>
   );
 }
