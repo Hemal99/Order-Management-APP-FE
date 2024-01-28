@@ -7,10 +7,13 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Box from "@mui/material/Box";
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { useForm, SubmitHandler, Controller, set } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../../redux/Slices/authSlice";
 import axiosInstance from "../../utils/axios";
+import { useDispatch } from "react-redux";
+import { setSnackbarOpen } from "../../redux/Slices/snackBarslice";
+import { logOut } from "../../redux/Slices/authSlice";
 
 type FormValues = {
   password?: string;
@@ -22,6 +25,7 @@ export default function ResetPasswordDialog(props: {
   handleClose: () => void;
 }) {
   const { open, handleClose } = props;
+  const dispatch = useDispatch();
 
   const { handleSubmit, control, reset } = useForm<FormValues>({
     defaultValues: {
@@ -43,8 +47,21 @@ export default function ResetPasswordDialog(props: {
         newPassword: data.password,
       });
       console.log(res);
+      handleCancel();
+      dispatch(
+        setSnackbarOpen({
+          text: "Password Successfully changed.",
+          type: "success",
+        })
+      );
+      setTimeout(() => {
+        dispatch(logOut());
+      }, 3000);
     } catch (error) {
       console.log(error);
+      dispatch(
+        setSnackbarOpen({ text: "Something went wrong", type: "error" })
+      );
     }
   };
   const handleCancel = () => {
@@ -64,7 +81,9 @@ export default function ResetPasswordDialog(props: {
           <DialogTitle>Reset your password</DialogTitle>
           <DialogContent>
             <DialogContentText sx={{ mb: 3 }}>
-              Please enter your New Password in both the fileds below.
+              Please enter your New Password in both the fileds below. After
+              Password reset , you will be logged out and you will have to log
+              backin with the new password.
             </DialogContentText>
             <Controller
               rules={{ required: "New Password can not be empty." }}

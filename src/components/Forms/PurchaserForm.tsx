@@ -49,7 +49,7 @@ function PurchaserForm(props: { handleClose: () => void }) {
 
   const OPTIONS = [
     "Order-Placed",
-    "In-Productoion",
+    "In-Production",
     "In-Transit",
     "Shipment-Arrived",
     "Goods-In-Warehouse",
