@@ -7,7 +7,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Box from "@mui/material/Box";
-import { useForm, SubmitHandler, Controller, set } from "react-hook-form";
+import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../../redux/Slices/authSlice";
 import axiosInstance from "../../utils/axios";
@@ -81,9 +81,11 @@ export default function ResetPasswordDialog(props: {
           <DialogTitle>Reset your password</DialogTitle>
           <DialogContent>
             <DialogContentText sx={{ mb: 3 }}>
-              Please enter your New Password in both the fileds below. After
-              Password reset , you will be logged out and you will have to log
-              backin with the new password.
+              Please enter your New Password in both the fileds below.
+              <p>
+                After Password reset , <strong>you will be logged out</strong>{" "}
+                and you will have to log back in with the new password.
+              </p>
             </DialogContentText>
             <Controller
               rules={{ required: "New Password can not be empty." }}

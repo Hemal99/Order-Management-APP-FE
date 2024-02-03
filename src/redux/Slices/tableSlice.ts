@@ -23,14 +23,17 @@ const initialState: TableState = {
   error: null,
 };
 
-const fetchDataThunk = createAsyncThunk("table/fetchData", async () => {
-  try {
-    const response = await axios.get("/user/get-all-request");
-    return response.data;
-  } catch (error) {
-    throw error;
+const fetchDataThunk = createAsyncThunk(
+  "table/fetchData",
+  async ({ url }: { url: string }) => {
+    try {
+      const response = await axios.get(`/user/${url}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
-});
+);
 
 const tableSlice = createSlice({
   name: "table",

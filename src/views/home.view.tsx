@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import AppBarDrawer from "../components/AppBarDrawer";
-import { Container, Button, Box , Typography} from "@mui/material";
-import Table from "../components/Table";
-import { Columns } from "../components/TableHeaders";
+import { Container, Button, Box, Typography } from "@mui/material";
+import Table from "../components/Tables/Table";
+import { RequsterColumnsCurrent } from "../components/Tables/THCurrentRequester";
+import { AdminColumnsCurrent } from "../components/Tables/THCurrentAdmin";
 import OrderRequestFormDialog from "../components/OrderDialog";
 import { useDispatch, useSelector } from "react-redux";
 import { selectTableState } from "../redux/Slices/tableSlice";
@@ -48,11 +49,6 @@ const Home = () => {
 
   const ITEMS_PER_PAGE = 10;
 
-  // useEffect to get the data
-  useEffect(() => {
-    dispatch(fetchDataThunk());
-  }, [dispatch]);
-
   useEffect(() => {
     setTotalPageCount(10 / ITEMS_PER_PAGE);
   }, [tableData]);
@@ -64,6 +60,15 @@ const Home = () => {
   console.log({ initialValues, currentPage });
 
   const currentUser = useSelector(selectCurrentUser);
+
+  // useEffect to get the data
+  useEffect(() => {
+    if (currentUser?.role === "Requester") {
+      dispatch(fetchDataThunk({ url: "get-current-requests-by-requester-id" }));
+    } else {
+      dispatch(fetchDataThunk({ url: "get-all-current-request" }));
+    }
+  }, [dispatch]);
 
   return (
     <>
@@ -84,9 +89,13 @@ const Home = () => {
         <Box>
           <Table
             data={tableData}
-            columns={Columns}
-            searchLabel="Search by Name or job title"
-            EmptyText="No staff found!"
+            columns={
+              currentUser?.role === "Requester"
+                ? RequsterColumnsCurrent
+                : AdminColumnsCurrent
+            }
+            searchLabel="Search by Name or Code"
+            EmptyText="No Data found!"
             isFetching={loading}
             pageCount={totalPageCount}
             page={handlePageChange}

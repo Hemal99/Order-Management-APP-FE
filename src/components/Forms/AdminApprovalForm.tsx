@@ -2,12 +2,11 @@ import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import {
   FormControl,
-  InputLabel,
   Button,
   CircularProgress,
   TextField,
 } from "@mui/material";
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { selectCurrentRequestId } from "../../redux/Slices/requestFormSlice";
 import axiosInstance from "../../utils/axios";
@@ -22,7 +21,7 @@ type adminFormValues = {
 function AdminApprovalForm(props: { handleClose: () => void }) {
   const [performingAction, setPerformingAction] = useState(false);
 
-  const { getValues, control, reset } = useForm<adminFormValues>({
+  const { getValues, control } = useForm<adminFormValues>({
     defaultValues: {
       comments: "",
     },
@@ -33,6 +32,7 @@ function AdminApprovalForm(props: { handleClose: () => void }) {
 
   const changeStatus = async (status: string) => {
     console.log("changing status");
+    setPerformingAction(true);
 
     const comments = getValues("comments");
 
@@ -45,7 +45,7 @@ function AdminApprovalForm(props: { handleClose: () => void }) {
         }
       );
 
-      dispatch(fetchDataThunk());
+      dispatch(fetchDataThunk({ url: "get-all-current-request" }));
       props.handleClose();
       if (status === "Approved") {
         dispatch(
@@ -63,6 +63,7 @@ function AdminApprovalForm(props: { handleClose: () => void }) {
         );
       }
       console.log(response);
+      setPerformingAction(false);
     } catch (err) {}
   };
 

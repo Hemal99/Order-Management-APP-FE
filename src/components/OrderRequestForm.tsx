@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  Container,
   Typography,
   Box,
   InputLabel,
@@ -15,11 +14,7 @@ import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { Dayjs } from "dayjs";
 import ClearIcon from "@mui/icons-material/Clear";
 import { useSelector } from "react-redux";
-import {
-  selectCurrentToken,
-  selectCurrentUser,
-} from "../redux/Slices/authSlice";
-import axios from "../utils/axios";
+import { selectCurrentToken } from "../redux/Slices/authSlice";
 import { uploadImagetoFirebase } from "../firebase";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store";
@@ -69,8 +64,6 @@ function OrderRequestForm(props: {
   const { handleSubmit, control, getValues, resetField } = useForm<FormValues>({
     defaultValues: props?.initialValues,
   });
-
-  const user = useSelector(selectCurrentUser);
   const currentFormState = useSelector(selectCurrentFromState);
   const requestId = useSelector(selectCurrentRequestId);
 
@@ -102,7 +95,12 @@ function OrderRequestForm(props: {
           },
         });
         console.log(res);
-        dispatch(setSnackbarOpen({ text: "Request Order Succesfully Created.", type: "success" }));
+        dispatch(
+          setSnackbarOpen({
+            text: "Request Order Succesfully Created.",
+            type: "success",
+          })
+        );
       }
 
       if (currentFormState == "edit") {
@@ -118,7 +116,12 @@ function OrderRequestForm(props: {
           }
         );
         console.log(res);
-        dispatch(setSnackbarOpen({ text: "Request Order Succesfully Edited.", type: "success" }));
+        dispatch(
+          setSnackbarOpen({
+            text: "Request Order Succesfully Edited.",
+            type: "success",
+          })
+        );
       }
     } catch (error) {
       console.log(error);
@@ -127,7 +130,7 @@ function OrderRequestForm(props: {
     }
     setPerformingAction(false);
     props.handleClose();
-    dispatch(fetchDataThunk());
+    dispatch(fetchDataThunk({ url: "get-current-requests-by-requester-id" }));
   };
 
   useEffect(() => {

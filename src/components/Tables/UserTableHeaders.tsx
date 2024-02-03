@@ -5,7 +5,9 @@ export const UserTableColumns: ColumnDef<any, any>[] = [
     accessorKey: "name",
     header: "Name",
     cell: (data: any) => {
-      return <span>{`${data.row.original.firstName} ${data.row.original.lastName} `}</span>;
+      return (
+        <span>{`${data.row.original.firstName} ${data.row.original.lastName} `}</span>
+      );
     },
   },
 

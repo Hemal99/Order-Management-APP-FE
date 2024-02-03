@@ -29,12 +29,9 @@ import {
 import { FC, memo, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
-  setFormState,
   setRequestId,
   setCurrentValues,
-} from "../redux/Slices/requestFormSlice";
-import { useSelector } from "react-redux";
-import { selectCurrentUserRole } from "../redux/Slices/authSlice";
+} from "../../redux/Slices/requestFormSlice";
 
 // Styles with styled-component
 
@@ -66,7 +63,6 @@ interface TableProps {
   children?: React.ReactNode | React.ReactElement;
   handleRow?: () => void;
   setModalOpen: (value: boolean) => void;
-  setInitialValues: (value: any) => void;
 }
 
 // The main table
@@ -82,11 +78,8 @@ const TableUI: FC<TableProps> = ({
   onClickRow,
   page,
   EmptyText,
-  // children,
-
   handleRow,
   setModalOpen,
-  setInitialValues,
 }) => {
   const [paginationPage, setPaginationPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -134,19 +127,11 @@ const TableUI: FC<TableProps> = ({
   };
 
   const dispatch = useDispatch();
-  const userRole = useSelector(selectCurrentUserRole);
-
   const handleOpenModal = (row: any) => {
     setModalOpen(true);
     console.log(row);
     dispatch(setRequestId(row?._id));
     dispatch(setCurrentValues(row));
-    if (row.status === "pending") {
-      dispatch(setFormState("edit"));
-    } else {
-      dispatch(setFormState("view"));
-    }
-    setInitialValues(row);
   };
 
   return (
@@ -222,19 +207,7 @@ const TableUI: FC<TableProps> = ({
                       size="small"
                       onClick={() => handleOpenModal(row?.original)}
                     >
-                      {userRole == "Admin" &&
-                        (row?.original.status === "pending"
-                          ? "Take Action"
-                          : "View")}
-                      {userRole == "Requester" &&
-                        (row?.original.status === "pending"
-                          ? "Edit"
-                          : "View")}
-                      {userRole == "Purchaser" &&
-                        (row?.original.status !== "pending" &&
-                        row?.original.status !== "Rejected"
-                          ? "Change Status"
-                          : "View")}
+                      View
                     </Button>
                   </TableCell>
                 </StyledTableRow>

@@ -7,6 +7,8 @@ import {
   Select,
   Button,
   CircularProgress,
+  TextField,
+  Typography,
 } from "@mui/material";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
@@ -14,37 +16,62 @@ import { selectCurrentRequestId } from "../../redux/Slices/requestFormSlice";
 import axiosInstance from "../../utils/axios";
 import { fetchDataThunk } from "../../redux/Slices/tableSlice";
 import { AppDispatch } from "../../redux/store";
+import { setSnackbarOpen } from "../../redux/Slices/snackBarslice";
 
 type PurchaserFormValues = {
   status?: string;
+  eta?: string;
 };
 
 function PurchaserForm(props: { handleClose: () => void }) {
   const [performingAction, setPerformingAction] = useState(false);
 
-  const { handleSubmit, control, reset } = useForm<PurchaserFormValues>({
+  const { handleSubmit, control, watch } = useForm<PurchaserFormValues>({
     defaultValues: {
       status: "",
+      eta: "",
     },
   });
 
   const dispatch = useDispatch<AppDispatch>();
   const requestId = useSelector(selectCurrentRequestId);
 
-  const purchaserStatusChange : SubmitHandler<PurchaserFormValues> = async (data) => {
+  const changedStatus = watch("status");
+
+  const purchaserStatusChange: SubmitHandler<PurchaserFormValues> = async (
+    data
+  ) => {
     console.log("changing status");
+    setPerformingAction(true);
     try {
       const response = await axiosInstance.put(
         `http://localhost:5000/user/change-status/${requestId}`,
         {
           status: data.status,
+          eta: data.eta ? data.eta : null,
         }
       );
 
-      dispatch(fetchDataThunk());
+      dispatch(fetchDataThunk({ url: "get-all-current-request" }));
+      dispatch(
+        setSnackbarOpen({
+          text: `Status Successfully changed Status to "${data.status}".`,
+          type: "success",
+        })
+      );
       props.handleClose();
       console.log(response);
-    } catch (err) {}
+    } catch (err) {
+      dispatch(fetchDataThunk({ url: "get-all-current-request" }));
+      dispatch(
+        setSnackbarOpen({
+          text: `Error :  ${err}.`,
+          type: "error",
+        })
+      );
+      props.handleClose();
+      setPerformingAction(false);
+    }
   };
 
   const OPTIONS = [
@@ -62,7 +89,7 @@ function PurchaserForm(props: { handleClose: () => void }) {
       sx={{ mt: 5 }}
     >
       <FormControl size={"small"} sx={{ mt: 1, width: "50%" }} fullWidth>
-        <InputLabel>Chnage Status to</InputLabel>
+        <InputLabel>Change Status to</InputLabel>
         <Controller
           render={({ field: { onChange, value } }) => (
             <Select onChange={onChange} value={value} label="Change Status to">
@@ -77,6 +104,39 @@ function PurchaserForm(props: { handleClose: () => void }) {
           name={"status"}
         />
       </FormControl>
+      <Box sx={{ mt: 3, width: "50%", display: "block" }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "20% 80%",
+            justifyContent: "space-between",
+          }}
+        >
+          {changedStatus == "In-Transit" && (
+            <>
+              <Typography>ETA : </Typography>
+              <FormControl size={"small"} fullWidth>
+                <Controller
+                  render={({ field: { onChange, value } }) => (
+                    <TextField
+                      multiline
+                      rows={2}
+                      size="small"
+                      onChange={onChange}
+                      value={value}
+                      fullWidth
+                      variant="outlined"
+                    />
+                  )}
+                  control={control}
+                  name={"eta"}
+                />
+              </FormControl>
+            </>
+          )}
+        </Box>
+      </Box>
+
       <Box
         sx={{
           m: 0,

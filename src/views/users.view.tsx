@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AppBarDrawer from "../components/AppBarDrawer";
 import { Container, Button, Box } from "@mui/material";
-import { useDispatch, useSelector } from "react-redux";
-import { selectTableState } from "../redux/Slices/tableSlice";
-import { fetchDataThunk } from "../redux/Slices/tableSlice";
-import { AppDispatch } from "../redux/store";
 import CreateUserForm from "../components/Forms/CreateUserForm";
 import UserTable from "../components/Tables/UserTable";
 import { UserTableColumns } from "../components/Tables/UserTableHeaders";
@@ -12,7 +8,6 @@ import axiosInstance from "../utils/axios";
 
 const Users = () => {
   // Initiate your states
-  const dispatch = useDispatch<AppDispatch>();
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -31,11 +26,6 @@ const Users = () => {
   // For pagination, define maximum of data per page
 
   const ITEMS_PER_PAGE = 10;
-
-  // useEffect to get the data
-  useEffect(() => {
-    dispatch(fetchDataThunk());
-  }, [dispatch]);
 
   useEffect(() => {
     setTotalPageCount(10 / ITEMS_PER_PAGE);

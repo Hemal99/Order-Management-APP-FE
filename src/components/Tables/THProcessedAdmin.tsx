@@ -1,13 +1,15 @@
 import { ColumnDef } from "@tanstack/react-table";
 import moment from "moment";
 
-export const Columns: ColumnDef<any, any>[] = [
+export const AdminColumnsProcessed: ColumnDef<any, any>[] = [
   {
     accessorKey: "date",
     header: "Date",
     cell: (data: any) => {
       return (
-        <span>{moment(data.row.original.createdAt).format("YYYY MMM DD")}</span>
+        <span>
+          {moment(data.row.original.createdAt).format("DD MMM YYYY ")}
+        </span>
       );
     },
   },

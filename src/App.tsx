@@ -13,6 +13,7 @@ import { selectCurrentUser } from "./redux/Slices/authSlice";
 import { useSelector } from "react-redux";
 import PermissibleRender from "./components/PermissibleRender";
 import SnackBar from "./components/Feedback/SnackBar";
+import Logs from "./views/logs.view";
 
 function App() {
   const currentUser = useSelector(selectCurrentUser);
@@ -27,6 +28,7 @@ function App() {
             {/* protected routes */}
             <Route element={<RequireAuth allowedRoles={["admin"]} />}>
               <Route path="/" element={<Home />} />
+              <Route path="/logs" element={<Logs />} />
               <Route path="/order-request" element={<OrderRequest />} />
               <Route
                 path="/users"
