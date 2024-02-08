@@ -15,29 +15,22 @@ const Logs = () => {
   // Initiate your states
   const dispatch = useDispatch<AppDispatch>();
   const { tableData, loading } = useSelector(selectTableState);
-  const [currentPage, setCurrentPage] = useState(1);
   const [totalPageCount, setTotalPageCount] = useState(1);
   const [modalOpen, setModalOpen] = React.useState(false);
 
   // For pagination, define maximum of data per page
 
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 8;
 
   useEffect(() => {
-    setTotalPageCount(10 / ITEMS_PER_PAGE);
+    setTotalPageCount(Math.ceil(tableData.length / ITEMS_PER_PAGE));
   }, [tableData]);
-
-  const handlePageChange = (page: any) => {
-    setCurrentPage(page);
-  };
 
   const handleClose = () => {
     setModalOpen(false);
   };
 
   const currentUser = useSelector(selectCurrentUser);
-
-  console.log(currentPage);
 
   // useEffect to get the data
   useEffect(() => {
@@ -64,8 +57,8 @@ const Logs = () => {
             EmptyText="No Data found!"
             isFetching={loading}
             pageCount={totalPageCount}
-            page={handlePageChange}
             setModalOpen={setModalOpen}
+            rowsPerPage={ITEMS_PER_PAGE}
           />
         </Box>
       </Container>

@@ -13,8 +13,8 @@ import {
   // Pagination,
   // styled,
   InputAdornment,
-  TablePagination,
   Button,
+  Typography,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { styled } from "@mui/material/styles";
@@ -25,8 +25,9 @@ import {
   getCoreRowModel,
   Row,
   useReactTable,
+  getPaginationRowModel,
 } from "@tanstack/react-table";
-import { FC, memo, useMemo, useState } from "react";
+import { FC, memo, useMemo, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
   setFormState,
@@ -35,7 +36,9 @@ import {
 } from "../../redux/Slices/requestFormSlice";
 import { useSelector } from "react-redux";
 import { selectCurrentUserRole } from "../../redux/Slices/authSlice";
-
+import IconButton from "@mui/material/IconButton";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 // Styles with styled-component
 
 export const StyledTableRow = styled(TableRow)`
@@ -58,7 +61,7 @@ interface TableProps {
   skeletonHeight?: number;
   headerComponent?: JSX.Element;
   pageCount?: number;
-  page?: (page: number) => void;
+  // page?: (page: number) => void;
   search?: (search: string) => void;
   onClickRow?: (cell: Cell<any, unknown>, row: Row<any>) => void;
   searchLabel?: string;
@@ -67,6 +70,7 @@ interface TableProps {
   handleRow?: () => void;
   setModalOpen: (value: boolean) => void;
   setInitialValues: (value: any) => void;
+  rowsPerPage: number;
 }
 
 // The main table
@@ -80,31 +84,39 @@ const TableUI: FC<TableProps> = ({
   // headerComponent,
   pageCount,
   onClickRow,
-  page,
+  // page,
   EmptyText,
   // children,
-
+  rowsPerPage,
   handleRow,
   setModalOpen,
   setInitialValues,
 }) => {
-  const [paginationPage, setPaginationPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-
   const memoizedData = useMemo(() => data, [data]);
   const memoizedColumns = useMemo(() => columns, [columns]);
-  // const memoisedHeaderComponent = useMemo(
-  //   () => headerComponent,
-  //   [headerComponent]
-  // );
 
-  const { getHeaderGroups, getRowModel, getAllColumns } = useReactTable({
+  const {
+    getHeaderGroups,
+    getRowModel,
+    getAllColumns,
+    setPageSize,
+    getState,
+    previousPage,
+    getCanPreviousPage,
+    nextPage,
+    getCanNextPage,
+  } = useReactTable({
     data: memoizedData,
     columns: memoizedColumns,
     getCoreRowModel: getCoreRowModel(),
-    manualPagination: true,
+    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: false,
     pageCount,
   });
+
+  useEffect(() => {
+    setPageSize(rowsPerPage);
+  }, []);
 
   const skeletons = Array.from({ length: skeletonCount }, (x, i) => i);
 
@@ -113,32 +125,11 @@ const TableUI: FC<TableProps> = ({
   const noDataFound =
     !isFetching && (!memoizedData || memoizedData.length === 0);
 
-  // const handlePageChange = (
-  //   event: ChangeEvent<unknown>,
-  //   currentPage: number
-  // ) => {
-  //   setPaginationPage(currentPage === 0 ? 1 : currentPage);
-  //   page?.(currentPage === 0 ? 1 : currentPage);
-  // };
-
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPaginationPage(newPage === 0 ? 1 : newPage);
-    page?.(newPage === 0 ? 1 : newPage);
-  };
-
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setRowsPerPage(+event.target.value);
-    setPaginationPage(0);
-  };
-
   const dispatch = useDispatch();
   const userRole = useSelector(selectCurrentUserRole);
 
   const handleOpenModal = (row: any) => {
     setModalOpen(true);
-    console.log(row);
     dispatch(setRequestId(row?._id));
     dispatch(setCurrentValues(row));
     if (row.status === "pending") {
@@ -163,17 +154,30 @@ const TableUI: FC<TableProps> = ({
         fullWidth
         placeholder="Search"
       />
-      {pageCount && page && (
-        <TablePagination
-          rowsPerPageOptions={[10, 25, 100]}
-          component="div"
-          count={pageCount}
-          rowsPerPage={rowsPerPage}
-          page={paginationPage}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      )}
+
+      <Box
+        sx={{
+          display: "flex",
+          py: 2,
+          justifyContent: "flex-end",
+          width: "90%",
+          mx: "auto",
+          alignItems: "center",
+        }}
+      >
+        <Typography fontSize={12}>
+          Page {getState().pagination.pageIndex + 1} of {pageCount}
+        </Typography>
+        <IconButton
+          onClick={() => previousPage()}
+          disabled={!getCanPreviousPage()}
+        >
+          <ChevronLeftIcon />
+        </IconButton>
+        <IconButton onClick={() => nextPage()} disabled={!getCanNextPage()}>
+          <ChevronRightIcon />
+        </IconButton>
+      </Box>
 
       <Box style={{ overflowX: "auto" }}>
         <MuiTable>

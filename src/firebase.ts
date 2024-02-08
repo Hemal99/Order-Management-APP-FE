@@ -6,6 +6,7 @@ import {
   updateMetadata,
   uploadBytes,
 } from "firebase/storage";
+import { getAuth, signInAnonymously } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyADAer5LRK6F5dmARp3wjqj9Gs9-tNIltU",
@@ -21,6 +22,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 // Initialize Cloud Storage and get a reference to the service
 const storage = getStorage(app);
+const auth = getAuth(app);
 
 export const uploadImagetoFirebase = async (file?: File, fileName?: string) => {
   console.log({ file });
@@ -44,5 +46,14 @@ export const uploadImagetoFirebase = async (file?: File, fileName?: string) => {
     return imageUrl;
   } catch (error) {
     console.log(error);
+  }
+};
+
+export const anonymousSignIn = async () => {
+  try {
+    await signInAnonymously(auth);
+    console.log("Signed in Anonymously to firebase.");
+  } catch (err) {
+    console.log(err);
   }
 };

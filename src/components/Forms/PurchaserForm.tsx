@@ -45,7 +45,7 @@ function PurchaserForm(props: { handleClose: () => void }) {
     setPerformingAction(true);
     try {
       const response = await axiosInstance.put(
-        `http://localhost:5000/user/change-status/${requestId}`,
+        `/user/change-status/${requestId}`,
         {
           status: data.status,
           eta: data.eta ? data.eta : null,

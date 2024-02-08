@@ -18,6 +18,7 @@ import { useDispatch } from "react-redux";
 import { setCredentials } from "../redux/Slices/authSlice";
 import { useLoginMutation } from "../api/auth.api";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { anonymousSignIn } from "../firebase";
 
 function Copyright(props: any) {
   return (
@@ -79,6 +80,7 @@ export default function Login() {
         email: email,
         password: password,
       }).unwrap();
+      await anonymousSignIn();
       console.log("helooo", userData);
       dispatch(
         setCredentials({

@@ -37,12 +37,12 @@ export default function NavDrawer(props: {
       <List sx={{ width: "20vw", pt: 5 }}>
         <DrawerLink
           href="/"
-          name="DashBoard"
+          name="Current Requests"
           iconComponent={<DashboardIcon />}
         />
         <DrawerLink
-          href="/logs"
-          name="Logs"
+          href="/processed"
+          name="Processed Requests"
           iconComponent={<AssignmentIcon />}
         />
         {currentUser?.role === "Admin" && (

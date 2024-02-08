@@ -16,7 +16,6 @@ const Home = () => {
   // Initiate your states
   const dispatch = useDispatch<AppDispatch>();
   const { tableData, loading } = useSelector(selectTableState);
-  const [currentPage, setCurrentPage] = useState(1);
   const [totalPageCount, setTotalPageCount] = useState(1);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [initialValues, setInitialValues] = useState({
@@ -47,17 +46,15 @@ const Home = () => {
 
   // For pagination, define maximum of data per page
 
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 8;
 
   useEffect(() => {
-    setTotalPageCount(10 / ITEMS_PER_PAGE);
+    setTotalPageCount(Math.ceil(tableData.length / ITEMS_PER_PAGE));
   }, [tableData]);
 
-  const handlePageChange = (page: any) => {
-    setCurrentPage(page);
-  };
-
-  console.log({ initialValues, currentPage });
+  // const handlePageChange = (page: any) => {
+  //   setCurrentPage(page);
+  // };
 
   const currentUser = useSelector(selectCurrentUser);
 
@@ -97,8 +94,8 @@ const Home = () => {
             searchLabel="Search by Name or Code"
             EmptyText="No Data found!"
             isFetching={loading}
+            rowsPerPage={ITEMS_PER_PAGE}
             pageCount={totalPageCount}
-            page={handlePageChange}
             setModalOpen={setModalOpen}
             setInitialValues={setInitialValues}
           />

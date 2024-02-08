@@ -1,0 +1,3 @@
+To Update Cors Settings on Firebase storage Bucket  ( Needed to render images in PDF Generation)
+
+//gcloud storage buckets update gs://BUCKET_NAME --cors-file=CORS_CONFIG_FILE

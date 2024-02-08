@@ -96,6 +96,7 @@ function OrderView({}) {
                 height: "160px",
                 width: "360px",
                 textAlign: "center",
+                border: "1px solid #000",
               }}
               id="imageContainer"
             >

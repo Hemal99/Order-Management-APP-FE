@@ -30,6 +30,7 @@ function CompletedOrderView({}) {
   console.log(values._id);
 
   const [logs, setLogs] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
 
   useEffect(() => {
     (async () => {
@@ -38,6 +39,7 @@ function CompletedOrderView({}) {
       );
       console.log(response);
       setLogs(response.data);
+      setLoading(false);
     })();
   }, []);
 
@@ -58,8 +60,12 @@ function CompletedOrderView({}) {
         <Typography sx={{ fontWeight: 600 }}>User Name</Typography>
         <Typography sx={{ fontWeight: 600 }}>Log</Typography>
       </Box>
-      <Box sx={{ mt: 2, mb: 10 }}>
+      <Box sx={{ mt: 2, mb: 2 }}>
         <div>
+          {loading && <Typography>Loading Data...</Typography>}
+          {logs.length === 0 && !loading && (
+            <Typography>No Logs Found</Typography>
+          )}
           {logs.map((log: any, i) => (
             <LogItem
               key={i}

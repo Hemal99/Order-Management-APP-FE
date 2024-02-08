@@ -14,7 +14,6 @@ import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { Dayjs } from "dayjs";
 import ClearIcon from "@mui/icons-material/Clear";
 import { useSelector } from "react-redux";
-import { selectCurrentToken } from "../redux/Slices/authSlice";
 import { uploadImagetoFirebase } from "../firebase";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store";
@@ -24,6 +23,7 @@ import {
   selectCurrentRequestId,
 } from "../redux/Slices/requestFormSlice";
 import { setSnackbarOpen } from "../redux/Slices/snackBarslice";
+import axiosInstance from "../utils/axios";
 
 const FormField = (props: { children: React.ReactElement[] }) => (
   <Box
@@ -67,7 +67,7 @@ function OrderRequestForm(props: {
   const currentFormState = useSelector(selectCurrentFromState);
   const requestId = useSelector(selectCurrentRequestId);
 
-  const token = useSelector(selectCurrentToken);
+  // const token = useSelector(selectCurrentToken);
   const dispatch = useDispatch<AppDispatch>();
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
@@ -86,14 +86,8 @@ function OrderRequestForm(props: {
     setPerformingAction(true);
     try {
       if (currentFormState == "add") {
-        const res = await fetch("http://localhost:5000/user/add-request", {
-          method: "POST",
-          body: JSON.stringify(requestBody),
-          headers: {
-            "Content-type": "application/json; charset=UTF-8",
-            authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await axiosInstance.post("/user/add-request", requestBody);
+
         console.log(res);
         dispatch(
           setSnackbarOpen({
@@ -104,16 +98,9 @@ function OrderRequestForm(props: {
       }
 
       if (currentFormState == "edit") {
-        const res = await fetch(
-          `http://localhost:5000/user/edit-request/${requestId}`,
-          {
-            method: "PUT",
-            body: JSON.stringify(requestBody),
-            headers: {
-              "Content-type": "application/json; charset=UTF-8",
-              authorization: `Bearer ${token}`,
-            },
-          }
+        const res = await axiosInstance.put(
+          `/user/edit-request/${requestId}`,
+          requestBody
         );
         console.log(res);
         dispatch(

@@ -103,7 +103,9 @@ export default function OrderRequestFormDialog(props: {
             {currentUser?.role === "Purchaser" && (
               <>
                 <OrderView />
-                <PurchaserForm handleClose={props.handleClose} />
+                {currentValues.status !== "pending" && (
+                  <PurchaserForm handleClose={props.handleClose} />
+                )}
               </>
             )}
           </>
