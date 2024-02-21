@@ -26,6 +26,7 @@ import {
   Row,
   useReactTable,
   getPaginationRowModel,
+  getFilteredRowModel,
 } from "@tanstack/react-table";
 import { FC, memo, useMemo, useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -105,11 +106,13 @@ const TableUI: FC<TableProps> = ({
     getCanPreviousPage,
     nextPage,
     getCanNextPage,
+    setGlobalFilter,
   } = useReactTable({
     data: memoizedData,
     columns: memoizedColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     manualPagination: false,
     pageCount,
   });
@@ -153,6 +156,9 @@ const TableUI: FC<TableProps> = ({
         }}
         fullWidth
         placeholder="Search"
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+          setGlobalFilter(event.target.value);
+        }}
       />
 
       <Box

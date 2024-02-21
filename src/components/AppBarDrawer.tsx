@@ -13,7 +13,7 @@ import { useDispatch } from "react-redux";
 import { logOut } from "../redux/Slices/authSlice";
 import ResetPasswordDialog from "./Forms/ResetPasswordForm";
 
-export default function AppBarDrawer(props: { title: string }) {
+export default function AppBarDrawer(props: { title?: string }) {
   // const [auth, setAuth] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [navDrawerOpen, setNavDrawerOpen] = React.useState<boolean>(false);
@@ -67,9 +67,20 @@ export default function AppBarDrawer(props: { title: string }) {
             >
               <MenuIcon />
             </IconButton>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              {props.title}
-            </Typography>
+            <div style={{ flexGrow: 1 }}>
+              {props.title ? (
+                <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                  {props.title}
+                </Typography>
+              ) : (
+                <img
+                  src="/al_ahrar_logo.png"
+                  alt="compnay logo"
+                  height={36}
+                ></img>
+              )}
+            </div>
+
             <div>
               <IconButton
                 size="large"

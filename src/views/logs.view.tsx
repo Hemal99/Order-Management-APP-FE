@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import AppBarDrawer from "../components/AppBarDrawer";
-import { Container, Box } from "@mui/material";
+import { Container, Box, Typography } from "@mui/material";
 import LogsTable from "../components/Tables/LogsTable";
 import { RequesterColumnsProcessed } from "../components/Tables/THProcessedRequester";
 import { AdminColumnsProcessed } from "../components/Tables/THProcessedAdmin";
 import { useDispatch, useSelector } from "react-redux";
-import { selectTableState } from "../redux/Slices/tableSlice";
-import { fetchDataThunk } from "../redux/Slices/tableSlice";
+import { selectTableState, fetchDataThunk } from "../redux/Slices/tableSlice";
 import { AppDispatch } from "../redux/store";
 import { selectCurrentUser } from "../redux/Slices/authSlice";
 import LogsDialog from "../components/LogsDialog";
@@ -39,13 +38,16 @@ const Logs = () => {
     } else {
       dispatch(fetchDataThunk({ url: "get-all-past-request" }));
     }
-  }, [dispatch]);
+  }, [dispatch, currentUser?.role]);
 
   return (
     <>
-      <AppBarDrawer title="Logs" />
+      <AppBarDrawer />
       <Container>
         <Box>
+          <Typography variant="h4" gutterBottom fontWeight={600}>
+            Processed Requests
+          </Typography>
           <LogsTable
             data={tableData}
             columns={

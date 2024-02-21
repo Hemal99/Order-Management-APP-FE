@@ -4,8 +4,6 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
 import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
@@ -81,7 +79,6 @@ export default function Login() {
         password: password,
       }).unwrap();
       await anonymousSignIn();
-      console.log("helooo", userData);
       dispatch(
         setCredentials({
           user: {
@@ -148,7 +145,7 @@ export default function Login() {
             component="form"
             noValidate
             onSubmit={handleSubmit(onSubmit)}
-            sx={{ mt: 1 }}
+            sx={{ mt: 1, width: "80%", mx: "auto" }}
           >
             <TextField
               margin="normal"
@@ -171,10 +168,6 @@ export default function Login() {
               {...register("password", { required: "Password is required" })}
               error={!!errors.password}
               helperText={errors.password?.message}
-            />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
             />
             <Typography variant="overline" display="block" gutterBottom>
               {loginErr}

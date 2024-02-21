@@ -15,12 +15,14 @@ type TableState = {
   tableData: TableRow[];
   loading: boolean;
   error: string | null;
+  pendingRequests: number;
 };
 
 const initialState: TableState = {
   tableData: [],
   loading: false,
   error: null,
+  pendingRequests: 0,
 };
 
 const fetchDataThunk = createAsyncThunk(
@@ -48,6 +50,13 @@ const tableSlice = createSlice({
       .addCase(fetchDataThunk.fulfilled, (state, action) => {
         state.loading = false;
         state.tableData = action.payload;
+        let pendingCount = 0;
+        action.payload.forEach((element: any) => {
+          if (element.status === "pending") {
+            pendingCount += 1;
+          }
+        });
+        state.pendingRequests = pendingCount;
       })
       .addCase(fetchDataThunk.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;

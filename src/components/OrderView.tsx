@@ -75,7 +75,7 @@ function OrderView({}) {
               attribute="Selling Price"
               value={values.sellingPrice}
             />
-            <ViewAttribute attribute="Comments" value={values.Comments} />
+            <ViewAttribute attribute="Comments" value={values.comments} />
             <ViewAttribute attribute="Current status" value={values.status} />
             <ViewAttribute
               attribute="Order Created at"

@@ -12,6 +12,16 @@ export const RequsterColumnsCurrent: ColumnDef<any, any>[] = [
         </span>
       );
     },
+    enableGlobalFilter: false,
+  },
+  {
+    accessorKey: "reqId",
+    header: "Req ID",
+    cell: (data: any) => {
+      return (
+        <span>{data.row.original.reqId.match(/\d+/)[0].padStart(4, "0")}</span>
+      );
+    },
   },
 
   {
@@ -28,6 +38,7 @@ export const RequsterColumnsCurrent: ColumnDef<any, any>[] = [
     cell: (data: any) => {
       return <span>{data.row.original.quantity}</span>;
     },
+    enableGlobalFilter: false,
   },
   {
     accessorKey: "sellingPrice",
@@ -35,6 +46,7 @@ export const RequsterColumnsCurrent: ColumnDef<any, any>[] = [
     cell: (data: any) => {
       return <span>{data.row.original.sellingPrice}</span>;
     },
+    enableGlobalFilter: false,
   },
   {
     accessorKey: "codeNumber",
@@ -55,6 +67,7 @@ export const RequsterColumnsCurrent: ColumnDef<any, any>[] = [
         />
       );
     },
+    enableGlobalFilter: false,
   },
   {
     accessorKey: "status",
@@ -62,7 +75,6 @@ export const RequsterColumnsCurrent: ColumnDef<any, any>[] = [
     cell: (data: any) => {
       return <span>{data.row.original.status}</span>;
     },
+    enableGlobalFilter: false,
   },
-
-  // You can follow the structure to display other data such as country and status
 ];
