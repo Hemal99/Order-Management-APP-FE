@@ -74,7 +74,7 @@ export default function AppBarDrawer(props: { title?: string }) {
                 </Typography>
               ) : (
                 <img
-                  src="/al_ahrar_logo.png"
+                  src="https://firebasestorage.googleapis.com/v0/b/order-app-41e22.appspot.com/o/static%2Fal_ahrar_logo.png?alt=media&token=4d1c8734-6f50-4af5-81e3-d12685437539"
                   alt="compnay logo"
                   height={36}
                 ></img>
