@@ -31,7 +31,7 @@ export const uploadImagetoFirebase = async (file?: File, fileName?: string) => {
 
   try {
     // Upload image.
-    const imageRef = ref(storage, `images/${fileName}`);
+    const imageRef = ref(storage, `images/${addTimestampToFilename(fileName)}`);
     const uploadImage = await uploadBytes(imageRef, file);
 
     // Create file metadata.
@@ -57,3 +57,22 @@ export const anonymousSignIn = async () => {
     console.log(err);
   }
 };
+
+function addTimestampToFilename(filename: string) {
+  const timestamp = Date.now();
+  const dotIndex = filename.lastIndexOf(".");
+
+  // If no dot is found, return the original filename
+  if (dotIndex === -1) {
+    return filename;
+  }
+
+  // Extract the name and extension parts
+  const name = filename.substring(0, dotIndex);
+  const extension = filename.substring(dotIndex);
+
+  // Combine the parts with the timestamp
+  const newFilename = `${name}_${timestamp}${extension}`;
+
+  return newFilename;
+}
